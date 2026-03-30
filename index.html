@@ -3,27 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS v4</title>
-
-<!-- Styles -->
+<title>FSTL COMET OS V5</title>
 <style>
-body { font-family: Arial, sans-serif; background-color: #f5f7fa; color: #1a1a1a; margin:0; padding:0; }
-header { background-color: #004aad; color: #fff; padding: 20px; text-align: center; }
-main { padding: 20px; max-width: 900px; margin: auto; }
-h1, h2 { color: #004aad; }
-form { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-label { display: block; margin-top: 15px; font-weight: bold; }
-input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
-button { margin-top: 20px; padding: 12px 20px; background-color: #004aad; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-button:hover { background-color: #003380; }
-section { margin-top: 40px; }
-.faq-item { margin-bottom: 15px; cursor: pointer; font-weight: bold; }
-.faq-answer { display: none; padding-left: 15px; color: #333; }
-footer { background-color: #004aad; color: #fff; text-align: center; padding: 15px; margin-top: 50px; font-size: 14px; }
-@media (max-width:600px){ main { padding: 10px; } input, button { font-size: 14px; } }
+body { font-family: Arial, sans-serif; background:#f5f7fa; color:#1a1a1a; margin:0; padding:0; }
+header{background:#004aad;color:#fff;padding:20px;text-align:center;}
+main{padding:20px;max-width:900px;margin:auto;}
+form, #verifySection{background:#fff;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1); margin-top:20px;}
+label{display:block;margin-top:15px;font-weight:bold;}
+input{width:100%;padding:10px;margin-top:5px;border-radius:4px;border:1px solid #ccc;}
+button{margin-top:20px;padding:12px 20px;background:#004aad;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;}
+button:hover{background:#003380;}
+.valid{color:green;font-weight:bold;}
+.invalid{color:red;font-weight:bold;}
 </style>
-
-<!-- jsPDF and QR libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -31,70 +23,39 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <body>
 
 <header>
-<h1>FSTL COMET OS v4</h1>
-<p>Digital Verification Test System</p>
+<h1>FSTL COMET OS V5</h1>
+<p>All-in-One Verification System</p>
 </header>
 
 <main>
 
+<!-- PDF Generation Form -->
 <h2>Generate Verification PDF</h2>
 <form id="osTestForm">
-  <label for="name">Full Name</label>
-  <input type="text" id="name" required>
-
-  <label for="email">Email Address</label>
-  <input type="email" id="email" required>
-
-  <label for="phone">Phone Number</label>
-  <input type="text" id="phone" required>
-
-  <label for="address">Address</label>
-  <input type="text" id="address" required>
-
-  <label for="bvn">BVN (Bank Verification Number)</label>
-  <input type="text" id="bvn" required>
-
-  <label for="nin">NIN (National Identification Number)</label>
-  <input type="text" id="nin" required>
-
+  <label>Name</label><input type="text" id="name" required>
+  <label>Email</label><input type="email" id="email" required>
+  <label>Phone</label><input type="text" id="phone" required>
+  <label>Address</label><input type="text" id="address" required>
+  <label>BVN</label><input type="text" id="bvn" required>
+  <label>NIN</label><input type="text" id="nin" required>
   <button type="submit">Generate PDF</button>
 </form>
 
-<section>
-<h2>FAQ</h2>
-<div class="faq-item">Why is BVN & NIN required?</div>
-<div class="faq-answer">Ensures verification PDF is uniquely tied to submitted identity data.</div>
-<div class="faq-item">What does the PDF prove?</div>
-<div class="faq-answer">Confirms submitted data and embeds QR code for verification.</div>
-<div class="faq-item">Is this test free?</div>
-<div class="faq-answer">Yes. This is a test environment.</div>
-</section>
-
-<section>
-<h2>Terms & Conditions</h2>
-<p>This verification reflects the data provided by the user. For testing purposes only.</p>
-</section>
+<!-- Verification Section -->
+<h2>Verify Record</h2>
+<div id="verifySection">
+  <label>Enter Verification ID</label>
+  <input type="text" id="verifyID" placeholder="FSTL-...">
+  <button id="verifyBtn">Verify</button>
+  <p id="verifyResult"></p>
+</div>
 
 </main>
 
-<footer>
-<p>Contact: fstlofficialsite@gmail.com | +2348035888622</p>
-<p>FSTL OS – Digital Verification Infrastructure</p>
-<p>“FSTL OS shoots. It doesn’t just talk.”</p>
-</footer>
-
-<!-- Script -->
 <script>
-// FAQ toggle
-document.querySelectorAll('.faq-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const answer = item.nextElementSibling;
-    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-  });
-});
-
-// Form submit
-document.getElementById('osTestForm').addEventListener('submit', function(e){
+// PDF Generation
+const form = document.getElementById('osTestForm');
+form.addEventListener('submit', function(e){
   e.preventDefault();
 
   const name = document.getElementById('name').value.trim();
@@ -105,29 +66,27 @@ document.getElementById('osTestForm').addEventListener('submit', function(e){
   const nin = document.getElementById('nin').value.trim();
 
   if(!name || !email || !phone || !address || !bvn || !nin){
-    alert('Please fill all fields.');
+    alert("All fields required");
     return;
   }
 
   // Verification ID + timestamp
   const timestamp = new Date().toISOString();
-  const verificationID = 'FSTL-' + Date.now();
+  const verificationID = "FSTL-" + Date.now();
 
-  // Hash for integrity
-  const rawData = name + email + phone + address + bvn + nin + timestamp;
+  // Hash
+  const rawData = name+email+phone+address+bvn+nin+timestamp;
   const hash = CryptoJS.SHA256(rawData).toString();
 
-  // Store record in localStorage (simulation of backend)
+  // Save to localStorage
   const record = { verificationID, timestamp, name, email, phone, address, bvn, nin, hash };
   localStorage.setItem(verificationID, JSON.stringify(record));
 
   // Generate PDF
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-
   doc.setFontSize(16);
   doc.text("FSTL OS Verification PDF", 20, 20);
-
   doc.setFontSize(12);
   doc.text(`Verification ID: ${verificationID}`, 20, 35);
   doc.text(`Timestamp: ${timestamp}`, 20, 45);
@@ -140,16 +99,34 @@ document.getElementById('osTestForm').addEventListener('submit', function(e){
   doc.text(`Hash: ${hash.substring(0,20)}...`, 20, 120);
   doc.text("QR embedded for verification", 20, 135);
 
-  // QR points to verify page
-  const verifyURL = `verify.html?id=${verificationID}`;
+  // QR points internally to verification section
+  const verifyURL = `#${verificationID}`;
   const qrDiv = document.createElement('div');
   new QRCode(qrDiv, verifyURL);
   const qrCanvas = qrDiv.querySelector('canvas');
   const qrDataURL = qrCanvas.toDataURL("image/png");
-
   doc.addImage(qrDataURL, 'PNG', 150, 30, 40, 40);
 
   doc.save(`${verificationID}.pdf`);
+  alert("PDF generated. Use Verification ID to verify below.");
+});
+
+// Verification
+const verifyBtn = document.getElementById('verifyBtn');
+verifyBtn.addEventListener('click', function(){
+  const id = document.getElementById('verifyID').value.trim();
+  const result = document.getElementById('verifyResult');
+
+  if(!id){ result.innerHTML="Please enter a Verification ID"; return; }
+
+  const recordJSON = localStorage.getItem(id);
+  if(recordJSON){
+    const record = JSON.parse(recordJSON);
+    result.innerHTML = `<span class="valid">✅ VALID RECORD FOUND</span><br>
+    ID: ${record.verificationID}<br>Name: ${record.name}<br>Address: ${record.address}<br>Timestamp: ${record.timestamp}`;
+  } else {
+    result.innerHTML = `<span class="invalid">❌ INVALID / NOT FOUND</span>`;
+  }
 });
 </script>
 
