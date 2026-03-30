@@ -42,22 +42,22 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <form id="osTestForm">
 
 <label for="name">Full Name</label>
-<input type="text" id="name" placeholder="Test User" required>
+<input type="text" id="name" required>
 
 <label for="email">Email Address</label>
-<input type="email" id="email" placeholder="test@example.com" required>
+<input type="email" id="email" required>
 
 <label for="phone">Phone Number</label>
-<input type="text" id="phone" placeholder="+2348012345678" required>
+<input type="text" id="phone" required>
 
 <label for="address">Address</label>
-<input type="text" id="address" placeholder="Enter your address" required>
+<input type="text" id="address" required>
 
 <label for="bvn">BVN (Bank Verification Number)</label>
-<input type="text" id="bvn" placeholder="12345678901" required>
+<input type="text" id="bvn" required>
 
 <label for="nin">NIN (National Identification Number)</label>
-<input type="text" id="nin" placeholder="12345678901" required>
+<input type="text" id="nin" required>
 
 <button type="submit">Generate PDF</button>
 
@@ -67,19 +67,19 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <h2>FAQ</h2>
 
 <div class="faq-item">Why is BVN & NIN required?</div>
-<div class="faq-answer">These inputs ensure your verification PDF is uniquely tied to the submitted identity data.</div>
+<div class="faq-answer">These inputs ensure your verification PDF is uniquely tied to submitted identity data.</div>
 
 <div class="faq-item">What does the PDF prove?</div>
-<div class="faq-answer">It confirms submitted data and embeds a QR code for verification. It enhances verification workflows but does not replace legal title or insurance.</div>
+<div class="faq-answer">It confirms submitted data and embeds a QR code for verification.</div>
 
 <div class="faq-item">Is this test free?</div>
-<div class="faq-answer">Yes. This is a test environment. Revenue comes from FSTL guarantee products.</div>
+<div class="faq-answer">Yes. This is a test environment.</div>
 
 </section>
 
 <section>
 <h2>Terms & Conditions</h2>
-<p>This verification reflects the data provided by the user. FSTL guarantees the integrity of generated output but does not insure ownership or title. This is for testing and verification purposes only.</p>
+<p>This verification reflects the data provided by the user. This is for testing purposes only.</p>
 </section>
 
 </main>
@@ -94,6 +94,7 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
+
 // FAQ toggle
 document.querySelectorAll('.faq-item').forEach(item => {
   item.addEventListener('click', () => {
@@ -102,7 +103,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 
-// Form submission
+// FORM
 const form = document.getElementById('osTestForm');
 
 form.addEventListener('submit', function(e){
@@ -115,10 +116,14 @@ form.addEventListener('submit', function(e){
   const bvn = document.getElementById('bvn').value.trim();
   const nin = document.getElementById('nin').value.trim();
 
-  if(!name || !email || !phone || !address || !bvn || !nin) {
+  if(!name || !email || !phone || !address || !bvn || !nin){
     alert('Please fill all required fields.');
     return;
   }
+
+  // ✅ VERIFICATION LAYER
+  const timestamp = new Date().toISOString();
+  const verificationID = 'FSTL-' + Date.now();
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -127,29 +132,39 @@ form.addEventListener('submit', function(e){
   doc.text("FSTL OS Verification PDF", 20, 20);
 
   doc.setFontSize(12);
-  doc.text(`Name: ${name}`, 20, 40);
-  doc.text(`Email: ${email}`, 20, 50);
-  doc.text(`Phone: ${phone}`, 20, 60);
-  doc.text(`Address: ${address}`, 20, 70);
-  doc.text(`BVN: ${bvn}`, 20, 80);
-  doc.text(`NIN: ${nin}`, 20, 90);
+  doc.text(`Verification ID: ${verificationID}`, 20, 35);
+  doc.text(`Timestamp: ${timestamp}`, 20, 45);
 
-  doc.text("This document enhances verification and embeds a QR for instant proof.", 20, 110);
+  doc.text(`Name: ${name}`, 20, 60);
+  doc.text(`Email: ${email}`, 20, 70);
+  doc.text(`Phone: ${phone}`, 20, 80);
+  doc.text(`Address: ${address}`, 20, 90);
+  doc.text(`BVN: ${bvn}`, 20, 100);
+  doc.text(`NIN: ${nin}`, 20, 110);
 
-  // QR generation
+  doc.text("QR embedded for verification.", 20, 130);
+
+  // QR DATA
+  const qrData = `
+ID:${verificationID}
+Time:${timestamp}
+Name:${name}
+Email:${email}
+Phone:${phone}
+Address:${address}
+BVN:${bvn}
+NIN:${nin}
+`;
+
   const qrDiv = document.createElement('div');
-  new QRCode(qrDiv,
-    `Name:${name},Email:${email},Phone:${phone},Address:${address},BVN:${bvn},NIN:${nin}`
-  );
+  new QRCode(qrDiv, qrData);
 
   const qrCanvas = qrDiv.querySelector('canvas');
   const qrDataURL = qrCanvas.toDataURL("image/png");
 
   doc.addImage(qrDataURL, 'PNG', 150, 40, 40, 40);
 
-  doc.save(`FSTL_OS_Verification_${name}.pdf`);
-
-  alert("Your PDF has been generated.");
+  doc.save(`FSTL_OS_${verificationID}.pdf`);
 });
 </script>
 
