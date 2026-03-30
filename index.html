@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL OS v3 TEST</title>
+<title>FSTL COMET OS v4</title>
 
+<!-- Styles -->
 <style>
 body { font-family: Arial, sans-serif; background-color: #f5f7fa; color: #1a1a1a; margin:0; padding:0; }
 header { background-color: #004aad; color: #fff; padding: 20px; text-align: center; }
@@ -19,67 +20,59 @@ section { margin-top: 40px; }
 .faq-item { margin-bottom: 15px; cursor: pointer; font-weight: bold; }
 .faq-answer { display: none; padding-left: 15px; color: #333; }
 footer { background-color: #004aad; color: #fff; text-align: center; padding: 15px; margin-top: 50px; font-size: 14px; }
-
-@media (max-width:600px){
-  main { padding: 10px; }
-  input, button { font-size: 14px; }
-}
+@media (max-width:600px){ main { padding: 10px; } input, button { font-size: 14px; } }
 </style>
-</head>
 
+<!-- jsPDF and QR libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
 <body>
 
 <header>
-<h1>FSTL OS v3 TEST</h1>
-<p>Digital verification test environment. Generate PDF and verify system output.</p>
+<h1>FSTL COMET OS v4</h1>
+<p>Digital Verification Test System</p>
 </header>
 
 <main>
 
-<h2>Test the OS</h2>
-<p>Enter your details below to generate a verification PDF with embedded QR.</p>
-
+<h2>Generate Verification PDF</h2>
 <form id="osTestForm">
+  <label for="name">Full Name</label>
+  <input type="text" id="name" required>
 
-<label for="name">Full Name</label>
-<input type="text" id="name" required>
+  <label for="email">Email Address</label>
+  <input type="email" id="email" required>
 
-<label for="email">Email Address</label>
-<input type="email" id="email" required>
+  <label for="phone">Phone Number</label>
+  <input type="text" id="phone" required>
 
-<label for="phone">Phone Number</label>
-<input type="text" id="phone" required>
+  <label for="address">Address</label>
+  <input type="text" id="address" required>
 
-<label for="address">Address</label>
-<input type="text" id="address" required>
+  <label for="bvn">BVN (Bank Verification Number)</label>
+  <input type="text" id="bvn" required>
 
-<label for="bvn">BVN (Bank Verification Number)</label>
-<input type="text" id="bvn" required>
+  <label for="nin">NIN (National Identification Number)</label>
+  <input type="text" id="nin" required>
 
-<label for="nin">NIN (National Identification Number)</label>
-<input type="text" id="nin" required>
-
-<button type="submit">Generate PDF</button>
-
+  <button type="submit">Generate PDF</button>
 </form>
 
 <section>
 <h2>FAQ</h2>
-
 <div class="faq-item">Why is BVN & NIN required?</div>
-<div class="faq-answer">These inputs ensure your verification PDF is uniquely tied to submitted identity data.</div>
-
+<div class="faq-answer">Ensures verification PDF is uniquely tied to submitted identity data.</div>
 <div class="faq-item">What does the PDF prove?</div>
-<div class="faq-answer">It confirms submitted data and embeds a QR code for verification.</div>
-
+<div class="faq-answer">Confirms submitted data and embeds QR code for verification.</div>
 <div class="faq-item">Is this test free?</div>
 <div class="faq-answer">Yes. This is a test environment.</div>
-
 </section>
 
 <section>
 <h2>Terms & Conditions</h2>
-<p>This verification reflects the data provided by the user. This is for testing purposes only.</p>
+<p>This verification reflects the data provided by the user. For testing purposes only.</p>
 </section>
 
 </main>
@@ -90,11 +83,8 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <p>“FSTL OS shoots. It doesn’t just talk.”</p>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
+<!-- Script -->
 <script>
-
 // FAQ toggle
 document.querySelectorAll('.faq-item').forEach(item => {
   item.addEventListener('click', () => {
@@ -103,10 +93,8 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 
-// FORM
-const form = document.getElementById('osTestForm');
-
-form.addEventListener('submit', function(e){
+// Form submit
+document.getElementById('osTestForm').addEventListener('submit', function(e){
   e.preventDefault();
 
   const name = document.getElementById('name').value.trim();
@@ -117,14 +105,23 @@ form.addEventListener('submit', function(e){
   const nin = document.getElementById('nin').value.trim();
 
   if(!name || !email || !phone || !address || !bvn || !nin){
-    alert('Please fill all required fields.');
+    alert('Please fill all fields.');
     return;
   }
 
-  // ✅ VERIFICATION LAYER
+  // Verification ID + timestamp
   const timestamp = new Date().toISOString();
   const verificationID = 'FSTL-' + Date.now();
 
+  // Hash for integrity
+  const rawData = name + email + phone + address + bvn + nin + timestamp;
+  const hash = CryptoJS.SHA256(rawData).toString();
+
+  // Store record in localStorage (simulation of backend)
+  const record = { verificationID, timestamp, name, email, phone, address, bvn, nin, hash };
+  localStorage.setItem(verificationID, JSON.stringify(record));
+
+  // Generate PDF
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -134,37 +131,25 @@ form.addEventListener('submit', function(e){
   doc.setFontSize(12);
   doc.text(`Verification ID: ${verificationID}`, 20, 35);
   doc.text(`Timestamp: ${timestamp}`, 20, 45);
-
   doc.text(`Name: ${name}`, 20, 60);
   doc.text(`Email: ${email}`, 20, 70);
   doc.text(`Phone: ${phone}`, 20, 80);
   doc.text(`Address: ${address}`, 20, 90);
   doc.text(`BVN: ${bvn}`, 20, 100);
   doc.text(`NIN: ${nin}`, 20, 110);
+  doc.text(`Hash: ${hash.substring(0,20)}...`, 20, 120);
+  doc.text("QR embedded for verification", 20, 135);
 
-  doc.text("QR embedded for verification.", 20, 130);
-
-  // QR DATA
-  const qrData = `
-ID:${verificationID}
-Time:${timestamp}
-Name:${name}
-Email:${email}
-Phone:${phone}
-Address:${address}
-BVN:${bvn}
-NIN:${nin}
-`;
-
+  // QR points to verify page
+  const verifyURL = `verify.html?id=${verificationID}`;
   const qrDiv = document.createElement('div');
-  new QRCode(qrDiv, qrData);
-
+  new QRCode(qrDiv, verifyURL);
   const qrCanvas = qrDiv.querySelector('canvas');
   const qrDataURL = qrCanvas.toDataURL("image/png");
 
-  doc.addImage(qrDataURL, 'PNG', 150, 40, 40, 40);
+  doc.addImage(qrDataURL, 'PNG', 150, 30, 40, 40);
 
-  doc.save(`FSTL_OS_${verificationID}.pdf`);
+  doc.save(`${verificationID}.pdf`);
 });
 </script>
 
