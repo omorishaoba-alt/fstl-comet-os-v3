@@ -1,1 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>FSTL Verify</title>
+</head>
+<body>
 
+<h2>Verification Portal</h2>
+<p id="result">Checking...</p>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+const record = localStorage.getItem(id);
+
+if(record){
+  document.getElementById("result").innerHTML = "✅ VALID RECORD FOUND";
+} else {
+  document.getElementById("result").innerHTML = "❌ INVALID / NOT FOUND";
+}
+</script>
+
+</body>
+</html>
