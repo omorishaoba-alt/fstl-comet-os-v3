@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FSTL OS v3 TEST</title>
+
 <style>
-/* Core Styling */
 body { font-family: Arial, sans-serif; background-color: #f5f7fa; color: #1a1a1a; margin:0; padding:0; }
 header { background-color: #004aad; color: #fff; padding: 20px; text-align: center; }
 main { padding: 20px; max-width: 900px; margin: auto; }
@@ -19,25 +19,28 @@ section { margin-top: 40px; }
 .faq-item { margin-bottom: 15px; cursor: pointer; font-weight: bold; }
 .faq-answer { display: none; padding-left: 15px; color: #333; }
 footer { background-color: #004aad; color: #fff; text-align: center; padding: 15px; margin-top: 50px; font-size: 14px; }
-/* Responsive */
+
 @media (max-width:600px){
   main { padding: 10px; }
   input, button { font-size: 14px; }
 }
 </style>
 </head>
+
 <body>
 
 <header>
 <h1>FSTL OS v3 TEST</h1>
-<p>CHATGPT acknowledges this digital OS test. Verify, generate PDF, and see how it works.</p>
+<p>Digital verification test environment. Generate PDF and verify system output.</p>
 </header>
 
 <main>
+
 <h2>Test the OS</h2>
-<p>Enter your details below to generate a verification PDF with embedded QR. All fields required (use placeholder/test data if needed).</p>
+<p>Enter your details below to generate a verification PDF with embedded QR.</p>
 
 <form id="osTestForm">
+
 <label for="name">Full Name</label>
 <input type="text" id="name" placeholder="Test User" required>
 
@@ -47,6 +50,9 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <label for="phone">Phone Number</label>
 <input type="text" id="phone" placeholder="+2348012345678" required>
 
+<label for="address">Address</label>
+<input type="text" id="address" placeholder="Enter your address" required>
+
 <label for="bvn">BVN (Bank Verification Number)</label>
 <input type="text" id="bvn" placeholder="12345678901" required>
 
@@ -54,38 +60,41 @@ footer { background-color: #004aad; color: #fff; text-align: center; padding: 15
 <input type="text" id="nin" placeholder="12345678901" required>
 
 <button type="submit">Generate PDF</button>
+
 </form>
 
 <section>
 <h2>FAQ</h2>
+
 <div class="faq-item">Why is BVN & NIN required?</div>
-<div class="faq-answer">These inputs ensure your verification PDF is legally traceable and uniquely yours.</div>
+<div class="faq-answer">These inputs ensure your verification PDF is uniquely tied to the submitted identity data.</div>
 
 <div class="faq-item">What does the PDF prove?</div>
-<div class="faq-answer">It confirms the input data and embeds a QR code for verification. It enhances title documents but does not replace legal title or insurance.</div>
+<div class="faq-answer">It confirms submitted data and embeds a QR code for verification. It enhances verification workflows but does not replace legal title or insurance.</div>
 
-<div class="faq-item">Is this a test free of charge?</div>
-<div class="faq-answer">Yes. The test is free. Real revenue comes from FSTL Guarantee purchases.</div>
+<div class="faq-item">Is this test free?</div>
+<div class="faq-answer">Yes. This is a test environment. Revenue comes from FSTL guarantee products.</div>
+
 </section>
 
 <section>
 <h2>Terms & Conditions</h2>
-<p>This verification reflects the data you provide. FSTL guarantees the integrity of the data but does not insure ownership or title. Use this PDF for verification and testing purposes only.</p>
+<p>This verification reflects the data provided by the user. FSTL guarantees the integrity of generated output but does not insure ownership or title. This is for testing and verification purposes only.</p>
 </section>
 
 </main>
 
 <footer>
 <p>Contact: fstlofficialsite@gmail.com | +2348035888622</p>
-<p>HRH, KABIYESI AYODELE OOGUNJE – Iwori Osa Aweda Jawusa</p>
-<p>The Redeemer of Shadows and the Guardian of Truth</p>
+<p>FSTL OS – Digital Verification Infrastructure</p>
 <p>“FSTL OS shoots. It doesn’t just talk.”</p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
-// FAQ Toggle
+// FAQ toggle
 document.querySelectorAll('.faq-item').forEach(item => {
   item.addEventListener('click', () => {
     const answer = item.nextElementSibling;
@@ -93,18 +102,20 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 
-// PDF + QR Generation
+// Form submission
 const form = document.getElementById('osTestForm');
+
 form.addEventListener('submit', function(e){
   e.preventDefault();
 
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
   const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
   const bvn = document.getElementById('bvn').value.trim();
   const nin = document.getElementById('nin').value.trim();
 
-  if(!name || !email || !phone || !bvn || !nin) {
+  if(!name || !email || !phone || !address || !bvn || !nin) {
     alert('Please fill all required fields.');
     return;
   }
@@ -114,23 +125,31 @@ form.addEventListener('submit', function(e){
 
   doc.setFontSize(16);
   doc.text("FSTL OS Verification PDF", 20, 20);
+
   doc.setFontSize(12);
   doc.text(`Name: ${name}`, 20, 40);
   doc.text(`Email: ${email}`, 20, 50);
   doc.text(`Phone: ${phone}`, 20, 60);
-  doc.text(`BVN: ${bvn}`, 20, 70);
-  doc.text(`NIN: ${nin}`, 20, 80);
-  doc.text("This document enhances your title verification and embeds a QR for instant proof.", 20, 100);
+  doc.text(`Address: ${address}`, 20, 70);
+  doc.text(`BVN: ${bvn}`, 20, 80);
+  doc.text(`NIN: ${nin}`, 20, 90);
 
-  // QR Generation
+  doc.text("This document enhances verification and embeds a QR for instant proof.", 20, 110);
+
+  // QR generation
   const qrDiv = document.createElement('div');
-  new QRCode(qrDiv, `Name:${name},Email:${email},Phone:${phone},BVN:${bvn},NIN:${nin}`);
+  new QRCode(qrDiv,
+    `Name:${name},Email:${email},Phone:${phone},Address:${address},BVN:${bvn},NIN:${nin}`
+  );
+
   const qrCanvas = qrDiv.querySelector('canvas');
   const qrDataURL = qrCanvas.toDataURL("image/png");
+
   doc.addImage(qrDataURL, 'PNG', 150, 40, 40, 40);
 
   doc.save(`FSTL_OS_Verification_${name}.pdf`);
-  alert("Your PDF with embedded QR has been generated. Please download and check.");
+
+  alert("Your PDF has been generated.");
 });
 </script>
 
