@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS V32 – IRREFUTABLE DYNAMO</title>
+<title>FSTL COMET OS V37</title>
 
 <style>
-body{font-family:Arial;background:#f5f7fa;margin:0}
+body{font-family:Arial;background:#f4f6f9;margin:0}
 header,footer{background:#000;color:#fff;text-align:center;padding:15px}
 main{padding:15px;max-width:900px;margin:auto}
 form{background:#fff;padding:15px;border-radius:8px}
 input,textarea{width:100%;padding:10px;margin-top:8px}
 button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border:none}
-#qrBox{text-align:center;margin-top:20px}
-#shareBtn{background:#25D366}
+#verifyBox{background:#fff;padding:15px;border-radius:8px}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,162 +22,208 @@ button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border
 <body>
 
 <header>
-<h2>FSTL COMET OS V32</h2>
-<p>Title Verification & Title Insurance System</p>
-<p>FIRST STANDARD TITLE LIMITED – First Bank: 2025222557</p>
+<h2>FSTL COMET OS V37</h2>
+<p>LIVE VERIFICATION SYSTEM</p>
 </header>
 
-<main>
+<main id="app"></main>
 
+<footer>
+FSTL – Title Verification & Title Insurance ONLY
+</footer>
+
+<script>
+
+// CHECK IF QR VERIFICATION MODE
+const params = new URLSearchParams(window.location.search);
+
+if(params.has("data")){
+renderVerification();
+}else{
+renderForm();
+}
+
+// ---------------- FORM ----------------
+function renderForm(){
+document.getElementById("app").innerHTML = `
 <form id="form">
 
-<h3>OWNER IDENTITY</h3>
+<h3>OWNER</h3>
 <input id="name" placeholder="Full Name" required>
 <input id="phone" placeholder="Phone" required>
 <input id="address" placeholder="Address" required>
 <input id="bvn" placeholder="BVN" required>
 <input id="nin" placeholder="NIN" required>
 
-<h3>PROPERTY DETAILS</h3>
-<textarea id="property" placeholder="Property Description" required></textarea>
-<input id="location" placeholder="Property Location" required>
+<h3>PROPERTY</h3>
+<textarea id="property" placeholder="Property"></textarea>
+<input id="location" placeholder="Location">
 
 <h3>TRANSACTION</h3>
-<input id="agent" placeholder="Agent Name + Ref" required>
-<input id="amount" placeholder="Total Fee Paid" required>
+<input id="agent" placeholder="Agent Name + Ref">
+<input id="amount" placeholder="Total Paid">
 
 <h3>PAYMENT PROOF</h3>
-<input type="file" id="proof" accept="image/*" required>
+<input type="file" id="proof" accept="image/*">
 
-<button>GENERATE IRREFUTABLE PDF</button>
+<button>GENERATE PDF</button>
 
 </form>
+<div id="qr"></div>
+`;
 
-<div id="qrBox"></div>
+document.getElementById("form").onsubmit = generate;
+}
 
-<button id="shareBtn">SHARE VIA WHATSAPP</button>
-
-</main>
-
-<footer>
-FSTL COMET OS – Title Verified. Title Insurable. Mortgage NOT Included.
-</footer>
-
-<script>
-
-let pdfName="";
-
-const FSTL_FEE = 25000;
-
-document.getElementById("form").addEventListener("submit",function(e){
+// ---------------- GENERATE ----------------
+async function generate(e){
 e.preventDefault();
 
-const name = document.getElementById("name").value;
-const phone = document.getElementById("phone").value;
-const address = document.getElementById("address").value;
-const bvn = document.getElementById("bvn").value;
-const nin = document.getElementById("nin").value;
+const FEE = 25000;
 
-const property = document.getElementById("property").value;
-const location = document.getElementById("location").value;
+let data = {
+id: "FSTL-"+Date.now(),
+time: new Date().toLocaleString(),
+name: val("name"),
+phone: val("phone"),
+address: val("address"),
+bvn: val("bvn"),
+nin: val("nin"),
+property: val("property"),
+location: val("location"),
+agent: val("agent"),
+amount: val("amount")
+};
 
-const agent = document.getElementById("agent").value;
-const amount = parseInt(document.getElementById("amount").value);
+data.agentProfit = data.amount - FEE;
 
-const proofFile = document.getElementById("proof").files[0];
+// CREATE VERIFICATION URL
+let encoded = encodeURIComponent(JSON.stringify(data));
+let verifyURL = window.location.origin + window.location.pathname + "?data=" + encoded;
 
-if(amount < FSTL_FEE){
-alert("Minimum ₦25,000 required");
-return;
-}
+// QR
+let qrDiv = document.getElementById("qr");
+qrDiv.innerHTML = "<h3>SCAN TO VERIFY</h3>";
+new QRCode(qrDiv, verifyURL);
 
-const agentProfit = amount - FSTL_FEE;
-const id = "FSTL-" + Date.now();
-const time = new Date().toLocaleString();
+// WAIT QR
+await new Promise(r=>setTimeout(r,500));
+let qrCanvas = qrDiv.querySelector("canvas");
+let qrData = qrCanvas.toDataURL("image/png");
 
-// QR GENERATION
-const qrDiv = document.getElementById("qrBox");
-qrDiv.innerHTML = "";
-new QRCode(qrDiv, id);
+// PAYMENT IMAGE
+let proofFile = document.getElementById("proof").files[0];
+let proofData = await toBase64(proofFile);
 
-setTimeout(()=>{
-
-const canvas = qrDiv.querySelector("canvas");
-const qrData = canvas.toDataURL();
-
-// READ IMAGE
-const reader = new FileReader();
-reader.onload = function(event){
-
-const proofImg = event.target.result;
-
+// PDF
 const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
+let doc = new jsPDF();
 
-doc.setFontSize(14);
-doc.text("FSTL TITLE VERIFICATION & INSURANCE REPORT",20,20);
+// HEADER
+header(doc);
 
-doc.setFontSize(10);
-doc.text("Verification ID: "+id,20,30);
-doc.text("Timestamp: "+time,20,36);
+// PAGE 1
+doc.text("TITLE VERIFICATION REPORT",20,30);
+doc.text("ID: "+data.id,20,40);
+doc.text("TIME: "+data.time,20,46);
 
-doc.text("OWNER IDENTITY",20,50);
-doc.text(name,20,56);
-doc.text(phone,20,62);
-doc.text(address,20,68);
-doc.text("BVN: "+bvn,20,74);
-doc.text("NIN: "+nin,20,80);
+doc.text("OWNER",20,60);
+doc.text(data.name,20,66);
+doc.text(data.phone,20,72);
+doc.text(data.address,20,78);
+doc.text("BVN: "+data.bvn,20,84);
+doc.text("NIN: "+data.nin,20,90);
 
-doc.text("PROPERTY DETAILS",20,95);
-doc.text(property,20,101);
-doc.text(location,20,107);
+doc.text("PROPERTY",20,105);
+doc.text(data.property,20,111);
+doc.text(data.location,20,117);
 
-doc.text("TRANSACTION",20,122);
-doc.text("Agent: "+agent,20,128);
-doc.text("Total Paid: ₦"+amount,20,134);
-doc.text("FSTL Fee: ₦"+FSTL_FEE,20,140);
-doc.text("Agent Earnings: ₦"+agentProfit,20,146);
+doc.text("TRANSACTION",20,132);
+doc.text("Agent: "+data.agent,20,138);
+doc.text("Total: ₦"+data.amount,20,144);
+doc.text("FSTL: ₦"+FEE,20,150);
+doc.text("Agent Earns: ₦"+data.agentProfit,20,156);
 
-doc.text("LEGAL DECLARATION",20,165);
-doc.text("This document certifies that the above property details",20,171);
-doc.text("have been submitted and verified under FSTL COMET OS.",20,177);
-doc.text("This title qualifies for FSTL Title Insurance.",20,183);
-doc.text("FSTL provides ONLY Title Verification and Title Insurance.",20,189);
-doc.text("Mortgage or lending is NOT within scope.",20,195);
+doc.addImage(qrData,"PNG",140,40,50,50);
 
-doc.addImage(qrData,"PNG",140,30,50,50);
+footer(doc);
 
+// PAGE 2
 doc.addPage();
+header(doc);
 
-doc.text("PAYMENT PROOF",20,20);
-doc.addImage(proofImg,"JPEG",20,30,160,100);
+doc.text("LEGAL",20,30);
+doc.text("This document is generated under FSTL COMET OS.",20,40);
+doc.text("Scan QR to verify authenticity.",20,50);
 
-pdfName = id+".pdf";
-doc.save(pdfName);
+footer(doc);
 
-alert("IRREFUTABLE PDF GENERATED");
+// PAGE 3
+doc.addPage();
+header(doc);
 
-};
+doc.text("PAYMENT PROOF",20,30);
+doc.addImage(proofData,"JPEG",20,40,160,100);
 
-reader.readAsDataURL(proofFile);
+footer(doc);
 
-},500);
-
-});
-
-// WHATSAPP SHARE
-document.getElementById("shareBtn").onclick=function(){
-if(!pdfName){
-alert("Generate PDF first");
-return;
+doc.save(data.id+".pdf");
+alert("LIVE VERIFICATION PDF GENERATED");
 }
-const msg = encodeURIComponent(
-"FSTL PROPERTY VERIFIED\nID: "+pdfName+"\nTitle Verified & Insurable"
-);
-window.open("https://wa.me/?text="+msg);
-};
+
+// ---------------- VERIFY PAGE ----------------
+function renderVerification(){
+let data = JSON.parse(decodeURIComponent(params.get("data")));
+
+document.getElementById("app").innerHTML = `
+<div id="verifyBox">
+<h3>VERIFICATION CONFIRMED</h3>
+
+<p><b>ID:</b> ${data.id}</p>
+<p><b>TIME:</b> ${data.time}</p>
+
+<p><b>NAME:</b> ${data.name}</p>
+<p><b>PHONE:</b> ${data.phone}</p>
+<p><b>ADDRESS:</b> ${data.address}</p>
+
+<p><b>BVN:</b> ${data.bvn}</p>
+<p><b>NIN:</b> ${data.nin}</p>
+
+<p><b>PROPERTY:</b> ${data.property}</p>
+<p><b>LOCATION:</b> ${data.location}</p>
+
+<p><b>AGENT:</b> ${data.agent}</p>
+<p><b>TOTAL:</b> ₦${data.amount}</p>
+
+<p><b>STATUS:</b> VERIFIED & ELIGIBLE FOR TITLE INSURANCE</p>
+</div>
+`;
+}
+
+// ---------------- HELPERS ----------------
+function val(id){return document.getElementById(id).value;}
+function toBase64(file){
+return new Promise((res,rej)=>{
+let r=new FileReader();
+r.readAsDataURL(file);
+r.onload=()=>res(r.result);
+r.onerror=e=>rej(e);
+});
+}
+
+function header(doc){
+doc.setFontSize(10);
+doc.text("FIRST STANDARD TITLE LIMITED",20,10);
+doc.line(20,12,190,12);
+}
+
+function footer(doc){
+doc.line(20,280,190,280);
+doc.setFontSize(8);
+doc.text("FSTL COMET OS | Title Verified. Title Insurable.",20,285);
+}
 
 </script>
 
 </body>
-</html>y
+</html>
