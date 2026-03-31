@@ -3,22 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS V28 – REVENUE DYNAMO</title>
+<title>FSTL COMET OS V32 – IRREFUTABLE DYNAMO</title>
 
 <style>
-body{font-family:Arial;margin:0;background:#f5f7fa}
+body{font-family:Arial;background:#f5f7fa;margin:0}
 header,footer{background:#000;color:#fff;text-align:center;padding:15px}
 main{padding:15px;max-width:900px;margin:auto}
-form,section{background:#fff;padding:15px;margin-top:15px;border-radius:8px}
-input,textarea{width:100%;padding:10px;margin-top:5px}
+form{background:#fff;padding:15px;border-radius:8px}
+input,textarea{width:100%;padding:10px;margin-top:8px}
 button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border:none}
-.notice{background:#ffe8cc;padding:10px;border-radius:6px}
-.share-btn{background:#25D366}
-#qrModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center}
-#qrBox{background:#fff;padding:20px;border-radius:10px;text-align:center}
-#dashboard{background:#e9ecef;padding:10px;border-radius:8px;margin-top:20px}
-.faq-item{cursor:pointer;font-weight:bold;margin-top:10px}
-.faq-answer{display:none;padding-left:10px}
+#qrBox{text-align:center;margin-top:20px}
+#shareBtn{background:#25D366}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -28,247 +23,162 @@ button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border
 <body>
 
 <header>
-<h2>FSTL COMET OS V28 – REVENUE DYNAMO</h2>
-<p>Verification • Payment • Proof • Revenue</p>
+<h2>FSTL COMET OS V32</h2>
+<p>Title Verification & Title Insurance System</p>
+<p>FIRST STANDARD TITLE LIMITED – First Bank: 2025222557</p>
 </header>
 
 <main>
 
-<section class="notice">
-<strong>PAYMENT FIRST:</strong><br>
-FIRST STANDARD TITLE LIMITED<br>
-First Bank of Nigeria<br>
-<b>Account: 2025222557</b><br>
-Generate receipt ONLY after confirmed payment.
-</section>
-
 <form id="form">
 
-<input placeholder="Full Name" id="fullName" required>
-<input placeholder="Phone Number" id="phone" required>
-<input placeholder="Address" id="address" required>
+<h3>OWNER IDENTITY</h3>
+<input id="name" placeholder="Full Name" required>
+<input id="phone" placeholder="Phone" required>
+<input id="address" placeholder="Address" required>
+<input id="bvn" placeholder="BVN" required>
+<input id="nin" placeholder="NIN" required>
 
-<textarea placeholder="Property Description" id="propertyDesc" required></textarea>
-<input placeholder="Property Location" id="propertyLocation" required>
+<h3>PROPERTY DETAILS</h3>
+<textarea id="property" placeholder="Property Description" required></textarea>
+<input id="location" placeholder="Property Location" required>
 
-<input placeholder="Agent Name + Ref" id="agentName" required>
-<input placeholder="Total Fee Paid (₦)" id="totalAmount" required>
+<h3>TRANSACTION</h3>
+<input id="agent" placeholder="Agent Name + Ref" required>
+<input id="amount" placeholder="Total Fee Paid" required>
 
-<label>Upload Payment Proof</label>
+<h3>PAYMENT PROOF</h3>
 <input type="file" id="proof" accept="image/*" required>
 
-<button type="submit">GENERATE RECEIPT</button>
+<button>GENERATE IRREFUTABLE PDF</button>
 
 </form>
 
-<button id="shareBtn" class="share-btn" style="display:none;">Share via WhatsApp</button>
+<div id="qrBox"></div>
 
-<!-- QR MODAL -->
-<div id="qrModal">
-<div id="qrBox">
-<h3>SCAN TO VERIFY</h3>
-<div id="qrCode"></div>
-<p id="qrID"></p>
-<button onclick="closeQR()">Close</button>
-</div>
-</div>
-
-<!-- DASHBOARD -->
-<section id="dashboard">
-<h3>Transaction Log</h3>
-<ul id="logList"></ul>
-<p id="totals"></p>
-</section>
-
-<!-- FAQ -->
-<section>
-<h3>FAQ</h3>
-
-<div class="faq-item">What is this system?</div>
-<div class="faq-answer">A property verification and revenue system powered by FSTL.</div>
-
-<div class="faq-item">How is revenue generated?</div>
-<div class="faq-answer">₦25,000 fixed FSTL fee per transaction. Agents earn the difference.</div>
-
-<div class="faq-item">Is this valid for financial use?</div>
-<div class="faq-answer">It provides a structured verification record for financial consideration.</div>
-
-</section>
+<button id="shareBtn">SHARE VIA WHATSAPP</button>
 
 </main>
 
 <footer>
-<p>FSTL COMET OS – It Stands Without Speaking</p>
+FSTL COMET OS – Title Verified. Title Insurable. Mortgage NOT Included.
 </footer>
 
 <script>
 
+let pdfName="";
+
 const FSTL_FEE = 25000;
-let lastID = "";
-let logs = JSON.parse(localStorage.getItem("fstlLogs") || "[]");
 
-function saveLogs(){
-localStorage.setItem("fstlLogs", JSON.stringify(logs));
-renderLogs();
-}
-
-function renderLogs(){
-const list = document.getElementById("logList");
-list.innerHTML = "";
-
-let fstlTotal = 0;
-let agentTotal = 0;
-
-logs.forEach(l=>{
-list.innerHTML += `<li>${l.id} | ₦${l.amount}</li>`;
-fstlTotal += FSTL_FEE;
-agentTotal += (l.amount - FSTL_FEE);
-});
-
-document.getElementById("totals").innerText =
-"FSTL Total: ₦" + fstlTotal + " | Agent Total: ₦" + agentTotal;
-}
-
-renderLogs();
-
-// FORM SUBMIT
-document.getElementById("form").addEventListener("submit", function(e){
+document.getElementById("form").addEventListener("submit",function(e){
 e.preventDefault();
 
-const name = document.getElementById("fullName").value;
+const name = document.getElementById("name").value;
 const phone = document.getElementById("phone").value;
 const address = document.getElementById("address").value;
-const property = document.getElementById("propertyDesc").value;
-const location = document.getElementById("propertyLocation").value;
-const agent = document.getElementById("agentName").value;
-const amount = parseInt(document.getElementById("totalAmount").value);
-const proof = document.getElementById("proof").files[0];
+const bvn = document.getElementById("bvn").value;
+const nin = document.getElementById("nin").value;
+
+const property = document.getElementById("property").value;
+const location = document.getElementById("location").value;
+
+const agent = document.getElementById("agent").value;
+const amount = parseInt(document.getElementById("amount").value);
+
+const proofFile = document.getElementById("proof").files[0];
 
 if(amount < FSTL_FEE){
 alert("Minimum ₦25,000 required");
 return;
 }
 
-if(!proof){
-alert("Payment proof required");
-return;
-}
-
-// AUTO ID
-const id = "FSTL-" + Date.now();
-lastID = id;
-
 const agentProfit = amount - FSTL_FEE;
+const id = "FSTL-" + Date.now();
+const time = new Date().toLocaleString();
 
-// SAVE PROOF
+// QR GENERATION
+const qrDiv = document.getElementById("qrBox");
+qrDiv.innerHTML = "";
+new QRCode(qrDiv, id);
+
+setTimeout(()=>{
+
+const canvas = qrDiv.querySelector("canvas");
+const qrData = canvas.toDataURL();
+
+// READ IMAGE
 const reader = new FileReader();
-reader.onload = function(){
-const link = document.createElement("a");
-link.href = reader.result;
-link.download = id + "_proof.png";
-link.click();
-};
-reader.readAsDataURL(proof);
+reader.onload = function(event){
 
-// PDF
+const proofImg = event.target.result;
+
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
 
-doc.setFontSize(16);
-doc.text("FSTL VERIFICATION RECEIPT", 20, 20);
+doc.setFontSize(14);
+doc.text("FSTL TITLE VERIFICATION & INSURANCE REPORT",20,20);
 
-doc.setFontSize(12);
-doc.text("Verification ID: " + id, 20, 40);
+doc.setFontSize(10);
+doc.text("Verification ID: "+id,20,30);
+doc.text("Timestamp: "+time,20,36);
 
-doc.text("Owner:", 20, 55);
-doc.text(name, 20, 65);
+doc.text("OWNER IDENTITY",20,50);
+doc.text(name,20,56);
+doc.text(phone,20,62);
+doc.text(address,20,68);
+doc.text("BVN: "+bvn,20,74);
+doc.text("NIN: "+nin,20,80);
 
-doc.text("Contact:", 20, 80);
-doc.text(phone, 20, 90);
+doc.text("PROPERTY DETAILS",20,95);
+doc.text(property,20,101);
+doc.text(location,20,107);
 
-doc.text("Address:", 20, 105);
-doc.text(address, 20, 115);
+doc.text("TRANSACTION",20,122);
+doc.text("Agent: "+agent,20,128);
+doc.text("Total Paid: ₦"+amount,20,134);
+doc.text("FSTL Fee: ₦"+FSTL_FEE,20,140);
+doc.text("Agent Earnings: ₦"+agentProfit,20,146);
 
-doc.text("Property Details:", 20, 130);
-doc.text(property, 20, 140);
-doc.text(location, 20, 150);
+doc.text("LEGAL DECLARATION",20,165);
+doc.text("This document certifies that the above property details",20,171);
+doc.text("have been submitted and verified under FSTL COMET OS.",20,177);
+doc.text("This title qualifies for FSTL Title Insurance.",20,183);
+doc.text("FSTL provides ONLY Title Verification and Title Insurance.",20,189);
+doc.text("Mortgage or lending is NOT within scope.",20,195);
 
-doc.text("Agent:", 20, 165);
-doc.text(agent, 20, 175);
+doc.addImage(qrData,"PNG",140,30,50,50);
 
-doc.text("Payment Summary:", 20, 190);
-doc.text("Total Paid: ₦" + amount, 20, 200);
-doc.text("FSTL Fee: ₦" + FSTL_FEE, 20, 210);
-doc.text("Agent Earnings: ₦" + agentProfit, 20, 220);
-
-// NEW PAGE
 doc.addPage();
 
-doc.text("PAYMENT CONFIRMATION", 20, 20);
-doc.text("Paid To: FIRST STANDARD TITLE LIMITED", 20, 40);
-doc.text("Bank: First Bank", 20, 50);
-doc.text("Account: 2025222557", 20, 60);
+doc.text("PAYMENT PROOF",20,20);
+doc.addImage(proofImg,"JPEG",20,30,160,100);
 
-doc.text("STATUS: VERIFIED RECORD", 20, 90);
+pdfName = id+".pdf";
+doc.save(pdfName);
 
-// QR
-const qrDiv = document.createElement("div");
-new QRCode(qrDiv, id);
-const qr = qrDiv.querySelector("canvas");
-doc.addImage(qr.toDataURL(), "PNG", 140, 100, 50, 50);
+alert("IRREFUTABLE PDF GENERATED");
 
-doc.save(id + ".pdf");
+};
 
-// LOG
-logs.push({id:id, amount:amount});
-saveLogs();
+reader.readAsDataURL(proofFile);
 
-// QR POPUP
-showQR(id);
-
-// SHARE ENABLE
-document.getElementById("shareBtn").style.display = "block";
-
-alert("RECEIPT GENERATED");
+},500);
 
 });
 
-// QR
-function showQR(id){
-const modal = document.getElementById("qrModal");
-const qrBox = document.getElementById("qrCode");
-
-qrBox.innerHTML = "";
-new QRCode(qrBox, id);
-
-document.getElementById("qrID").innerText = id;
-modal.style.display = "flex";
+// WHATSAPP SHARE
+document.getElementById("shareBtn").onclick=function(){
+if(!pdfName){
+alert("Generate PDF first");
+return;
 }
-
-function closeQR(){
-document.getElementById("qrModal").style.display = "none";
-}
-
-// SHARE
-document.getElementById("shareBtn").addEventListener("click", function(){
 const msg = encodeURIComponent(
-`FSTL VERIFIED
-
-ID: ${lastID}
-STATUS: VERIFIED`
+"FSTL PROPERTY VERIFIED\nID: "+pdfName+"\nTitle Verified & Insurable"
 );
-window.open(`https://wa.me/?text=${msg}`);
-});
-
-// FAQ
-document.querySelectorAll(".faq-item").forEach(item=>{
-item.addEventListener("click", ()=>{
-const ans = item.nextElementSibling;
-ans.style.display = ans.style.display==="block"?"none":"block";
-});
-});
+window.open("https://wa.me/?text="+msg);
+};
 
 </script>
 
 </body>
-</html>
+</html>y
