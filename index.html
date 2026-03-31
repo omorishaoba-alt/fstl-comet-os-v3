@@ -6,16 +6,19 @@
 <title>FSTL COMET OS V28 – REVENUE DYNAMO</title>
 
 <style>
-body{font-family:Arial;background:#f5f7fa;margin:0}
-header{background:#000;color:#fff;text-align:center;padding:15px}
+body{font-family:Arial;margin:0;background:#f5f7fa}
+header,footer{background:#000;color:#fff;text-align:center;padding:15px}
 main{padding:15px;max-width:900px;margin:auto}
-form,section{background:#fff;padding:15px;margin-top:15px;border-radius:8px}
+section,form{background:#fff;padding:15px;margin-top:15px;border-radius:8px}
 input,textarea{width:100%;padding:10px;margin-top:5px}
-button{margin-top:15px;padding:12px;background:#000;color:#fff;border:none;width:100%}
-.notice{background:#ffe8cc;padding:10px;border-radius:6px;margin-top:10px}
+button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border:none}
+.notice{background:#ffe8cc;padding:10px;border-radius:6px}
 .share-btn{background:#25D366}
 #qrModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center}
 #qrBox{background:#fff;padding:20px;border-radius:10px;text-align:center}
+#dashboard{background:#e9ecef;padding:10px;border-radius:8px;margin-top:20px}
+.faq-item{cursor:pointer;font-weight:bold;margin-top:10px}
+.faq-answer{display:none;padding-left:10px}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -26,7 +29,7 @@ button{margin-top:15px;padding:12px;background:#000;color:#fff;border:none;width
 
 <header>
 <h2>FSTL COMET OS V28 – REVENUE DYNAMO</h2>
-<p>Verification. Payment. Proof.</p>
+<p>Verification • Payment • Proof • Revenue</p>
 </header>
 
 <main>
@@ -35,14 +38,15 @@ button{margin-top:15px;padding:12px;background:#000;color:#fff;border:none;width
 <strong>PAYMENT FIRST:</strong><br>
 FIRST STANDARD TITLE LIMITED<br>
 First Bank of Nigeria<br>
-<b>Account: 2025222557</b><br><br>
-⚠️ Generate receipt ONLY after payment.
+<b>Account: 2025222557</b><br>
+Generate receipt ONLY after payment confirmation.
 </section>
 
 <form id="form">
 
 <input placeholder="Full Name" id="name" required>
-<input placeholder="Phone" id="phone" required>
+<input placeholder="Phone Number" id="phone" required>
+<input placeholder="Address" id="address" required>
 
 <textarea placeholder="Property Description" id="property" required></textarea>
 <input placeholder="Property Location" id="location" required>
@@ -57,9 +61,7 @@ First Bank of Nigeria<br>
 
 </form>
 
-<button id="shareBtn" class="share-btn" style="display:none;">
-Share via WhatsApp
-</button>
+<button id="shareBtn" class="share-btn" style="display:none;">Share via WhatsApp</button>
 
 <!-- QR POPUP -->
 <div id="qrModal">
@@ -71,127 +73,175 @@ Share via WhatsApp
 </div>
 </div>
 
+<!-- DASHBOARD -->
+<section id="dashboard">
+<h3>Transaction Log</h3>
+<ul id="log"></ul>
+<p id="totals"></p>
+</section>
+
+<!-- FAQ -->
+<section>
+<h3>FAQ</h3>
+<div class="faq-item">What is this?</div>
+<div class="faq-answer">A verification and revenue system for property transactions.</div>
+
+<div class="faq-item">How is revenue generated?</div>
+<div class="faq-answer">FSTL earns ₦25,000 per verification. Agents earn the difference.</div>
+
+<div class="faq-item">Is this valid for banks?</div>
+<div class="faq-answer">This document provides verified records for financial consideration.</div>
+</section>
+
 </main>
+
+<footer>
+<p>FSTL COMET OS – It Stands Without Speaking</p>
+</footer>
 
 <script>
 
 const FSTL_FEE = 25000;
 let lastID = "";
+let logs = JSON.parse(localStorage.getItem("fstlLogs")||"[]");
 
-// FORM
-document.getElementById('form').addEventListener('submit', function(e){
+function saveLogs(){
+localStorage.setItem("fstlLogs",JSON.stringify(logs));
+renderLogs();
+}
+
+function renderLogs(){
+const logEl=document.getElementById("log");
+logEl.innerHTML="";
+let fstlTotal=0,agentTotal=0;
+
+logs.forEach(l=>{
+logEl.innerHTML+=`<li>${l.id} | ₦${l.amount}</li>`;
+fstlTotal+=FSTL_FEE;
+agentTotal+=l.amount-FSTL_FEE;
+});
+
+document.getElementById("totals").innerText=
+"FSTL: ₦"+fstlTotal+" | Agents: ₦"+agentTotal;
+}
+
+renderLogs();
+
+// FORM SUBMIT
+document.getElementById("form").addEventListener("submit",function(e){
 e.preventDefault();
 
-const name = document.getElementById('name').value;
-const phone = document.getElementById('phone').value;
-const property = document.getElementById('property').value;
-const location = document.getElementById('location').value;
-const agent = document.getElementById('agent').value;
-const amount = parseInt(document.getElementById('amount').value);
-const proof = document.getElementById('proof').files[0];
+const name=name.value;
+const phone=phone.value;
+const address=address.value;
+const property=property.value;
+const location=location.value;
+const agent=agent.value;
+const amount=parseInt(amount.value);
+const proof=document.getElementById("proof").files[0];
 
 if(amount < FSTL_FEE){
 alert("Minimum ₦25,000 required");
 return;
 }
 
-if(!proof){
-alert("Upload payment proof");
-return;
-}
-
-const id = "FSTL-"+Date.now();
-lastID = id;
-
-const agentProfit = amount - FSTL_FEE;
+const id="FSTL-"+Date.now();
+lastID=id;
+const agentProfit=amount-FSTL_FEE;
 
 // SAVE PROOF
-const reader = new FileReader();
-reader.onload = function(){
-const link = document.createElement('a');
-link.href = reader.result;
-link.download = id+"_proof.png";
+const reader=new FileReader();
+reader.onload=function(){
+const link=document.createElement("a");
+link.href=reader.result;
+link.download=id+"_proof.png";
 link.click();
 };
 reader.readAsDataURL(proof);
 
 // PDF
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF();
 
 doc.setFontSize(16);
 doc.text("FSTL VERIFICATION RECEIPT",20,20);
 
 doc.setFontSize(12);
-doc.text("Verification ID: "+id,20,40);
+doc.text("ID: "+id,20,40);
 doc.text("Name: "+name,20,50);
 doc.text("Phone: "+phone,20,60);
+doc.text("Address: "+address,20,70);
 
-doc.text("Property:",20,80);
-doc.text(property,20,90);
-doc.text(location,20,100);
+doc.text("Property:",20,90);
+doc.text(property,20,100);
+doc.text(location,20,110);
 
-doc.text("Agent: "+agent,20,120);
+doc.text("Agent: "+agent,20,130);
 
-doc.text("TOTAL PAID: ₦"+amount,20,140);
-doc.text("FSTL FEE: ₦"+FSTL_FEE,20,150);
-doc.text("AGENT EARNINGS: ₦"+agentProfit,20,160);
+doc.text("TOTAL: ₦"+amount,20,150);
+doc.text("FSTL: ₦"+FSTL_FEE,20,160);
+doc.text("Agent Earns: ₦"+agentProfit,20,170);
 
-doc.text("PAID TO:",20,180);
-doc.text("FIRST STANDARD TITLE LIMITED",20,190);
+doc.text("Paid To FSTL",20,190);
 doc.text("First Bank | 2025222557",20,200);
 
-// AUTHORITY
-doc.text("STATUS: VERIFIED RECORD",20,220);
+doc.text("STATUS: VERIFIED",20,220);
 
 // QR
-const qrDiv = document.createElement('div');
+const qrDiv=document.createElement("div");
 new QRCode(qrDiv,id);
-const qr = qrDiv.querySelector('canvas');
+const qr=qrDiv.querySelector("canvas");
 doc.addImage(qr.toDataURL(),"PNG",150,40,40,40);
 
 doc.save(id+".pdf");
 
-// SHOW QR POPUP
+// LOG
+logs.push({id:id,amount:amount});
+saveLogs();
+
+// QR POPUP
 showQR(id);
 
-// SHOW SHARE
-document.getElementById('shareBtn').style.display="block";
+// SHARE
+document.getElementById("shareBtn").style.display="block";
 
 alert("RECEIPT GENERATED");
 
 });
 
-// QR MODAL
+// QR
 function showQR(id){
-const modal = document.getElementById('qrModal');
-const qrContainer = document.getElementById('qrCode');
+const modal=document.getElementById("qrModal");
+const qrBox=document.getElementById("qrCode");
 
-qrContainer.innerHTML="";
-new QRCode(qrContainer,id);
+qrBox.innerHTML="";
+new QRCode(qrBox,id);
 
-document.getElementById('qrID').innerText=id;
+document.getElementById("qrID").innerText=id;
 modal.style.display="flex";
 }
 
 function closeQR(){
-document.getElementById('qrModal').style.display="none";
+document.getElementById("qrModal").style.display="none";
 }
 
-// WHATSAPP
-document.getElementById('shareBtn').addEventListener('click', function(){
-
-const msg = encodeURIComponent(
+// SHARE
+document.getElementById("shareBtn").addEventListener("click",function(){
+const msg=encodeURIComponent(
 `FSTL VERIFIED TRANSACTION
 
 ID: ${lastID}
-STATUS: VERIFIED
-
-Payment confirmed and recorded.`
+STATUS: VERIFIED`
 );
-
 window.open(`https://wa.me/?text=${msg}`);
+});
 
+// FAQ toggle
+document.querySelectorAll(".faq-item").forEach(item=>{
+item.addEventListener("click",()=>{
+const ans=item.nextElementSibling;
+ans.style.display=ans.style.display==="block"?"none":"block";
+});
 });
 
 </script>
