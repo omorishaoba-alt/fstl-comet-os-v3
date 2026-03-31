@@ -3,17 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS V38</title>
+<title>FSTL COMET OS – Public Demo</title>
 
 <style>
-body{font-family:Arial;background:#f4f6f9;margin:0}
-header,footer{background:#000;color:#fff;text-align:center;padding:15px}
-main{padding:15px;max-width:900px;margin:auto}
-form{background:#fff;padding:15px;border-radius:8px}
-input,textarea{width:100%;padding:10px;margin-top:8px}
-button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border:none}
-#qrModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center}
-#qrBox{background:#fff;padding:20px;border-radius:8px;text-align:center}
+body{
+  font-family: Arial, sans-serif;
+  background:#0a0a0a;
+  color:#fff;
+  text-align:center;
+  padding:40px;
+}
+h1{font-size:22px;margin-bottom:10px}
+p{opacity:0.8}
+button{
+  padding:14px 28px;
+  font-size:16px;
+  margin-top:25px;
+  background:#1e90ff;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+button:hover{background:#0d6efd;}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -22,228 +34,179 @@ button{margin-top:15px;padding:12px;width:100%;background:#000;color:#fff;border
 
 <body>
 
-<header>
-<h2>FSTL COMET OS V38</h2>
-<p>FIRST STANDARD TITLE LIMITED</p>
-<p>Account: 2025222557 (First Bank)</p>
-<p>Email: fstlofficialsite@gmail.com | +2348035888622</p>
-</header>
+<h1>FSTL COMET OS</h1>
+<p>Title Verification & Title Insurance Demonstration</p>
+<p>Click below to generate a full verification document</p>
 
-<main id="app"></main>
+<button onclick="generatePDF()">Generate Verification PDF</button>
 
-<footer>
-FSTL – Title Verification & Title Insurance ONLY
-</footer>
-
-<div id="qrModal">
-<div id="qrBox">
-<h3>SCAN QR – LIVE VERIFICATION</h3>
-<div id="qrCanvas"></div>
-<button onclick="closeQR()">CONFIRM</button>
-</div>
-</div>
+<div id="qr" style="display:none;"></div>
 
 <script>
 
-// ROUTING
-const params = new URLSearchParams(window.location.search);
-if(params.has("data")){renderVerify();} else {renderForm();}
-
-// FORM
-function renderForm(){
-document.getElementById("app").innerHTML=`
-<form id="form">
-
-<h3>OWNER</h3>
-<input id="name" placeholder="Full Name" required>
-<input id="phone" placeholder="Phone" required>
-<input id="address" placeholder="Address" required>
-<input id="bvn" placeholder="BVN" required>
-<input id="nin" placeholder="NIN" required>
-
-<h3>PROPERTY</h3>
-<textarea id="property" placeholder="Property Description" required></textarea>
-<input id="location" placeholder="Location" required>
-
-<h3>TRANSACTION</h3>
-<input id="agentName" placeholder="Agent Name" required>
-<input id="amount" placeholder="Total Fee Paid" required>
-
-<h3>PAYMENT PROOF</h3>
-<input type="file" id="proof" accept="image/*" required>
-
-<button>GENERATE IRREFUTABLE PDF</button>
-
-</form>
-`;
-document.getElementById("form").onsubmit=generate;
-}
-
-// GENERATE
-async function generate(e){
-e.preventDefault();
-
-const FEE=25000;
-
-let data={
+// 🔴 PREFILL DATA (PROFESSIONAL DEMO)
+const data = {
 id:"FSTL-"+Date.now(),
 time:new Date().toLocaleString(),
-agentCode:"AG-"+Math.floor(Math.random()*1000000),
-
-name:val("name"),
-phone:val("phone"),
-address:val("address"),
-bvn:val("bvn"),
-nin:val("nin"),
-
-property:val("property"),
-location:val("location"),
-
-agentName:val("agentName"),
-amount:parseInt(val("amount"))
+name:"Sample Property Owner",
+phone:"+2348012345678",
+address:"19 Egbor Avenue, GRA Benin City, Edo State",
+bvn:"12345678901",
+nin:"A1234567890",
+property:"Residential Duplex (4 Bedroom)",
+location:"GRA, Benin City",
+mode:"DIRECT",
+fstlFee:25000,
+agentName:"DIRECT",
+agentCode:"N/A",
+agentProfit:0,
+total:25000
 };
 
-data.agentProfit=data.amount-FEE;
+// 🔗 VERIFY LINK
+let verifyURL = location.href.split("?")[0] + "?data=" + encodeURIComponent(JSON.stringify(data));
 
-// LIVE URL
-let encoded=encodeURIComponent(JSON.stringify(data));
-let verifyURL=location.href.split("?")[0]+"?data="+encoded;
+// QR GENERATION
+let qrDiv = document.getElementById("qr");
+new QRCode(qrDiv,{text:verifyURL,width:200,height:200});
 
-// QR POPUP
-showQR(verifyURL);
-await wait(500);
+// REGISTRY PLACEHOLDER
+function logRegistry(d){
+/*
+fetch("YOUR_REGISTRY_ENDPOINT",{
+method:"POST",
+body:JSON.stringify(d)
+});
+*/
+}
 
-let qrCanvas=document.querySelector("#qrCanvas canvas");
-let qrImage=qrCanvas.toDataURL("image/png");
+// PDF GENERATION
+function generatePDF(){
 
-// PAYMENT IMAGE
-let proof=await toBase64(document.getElementById("proof").files[0]);
+logRegistry(data);
 
-// PDF
 const { jsPDF } = window.jspdf;
-let doc=new jsPDF();
+let doc = new jsPDF();
 
-// PAGE 1
-header(doc);
+// HEADER
+function header(){
+doc.setFontSize(10);
+doc.text("FIRST STANDARD TITLE LIMITED",20,10);
+doc.text("fstlofficialsite@gmail.com | +2348035888622",20,15);
+doc.line(20,18,190,18);
+}
+
+// FOOTER
+function footer(){
+doc.line(20,280,190,280);
+doc.setFontSize(8);
+doc.text("FSTL COMET OS – Verified Record",20,285);
+doc.text("Account: 2025222557 (First Bank)",20,290);
+}
+
+// PAGE 1 — COVER
+header();
 doc.setFontSize(14);
 doc.text("TITLE VERIFICATION REPORT",20,30);
 
 doc.setFontSize(10);
-doc.text("ID: "+data.id,20,40);
-doc.text("TIME: "+data.time,20,46);
-doc.text("AGENT CODE: "+data.agentCode,20,52);
+doc.text("Verification ID: "+data.id,20,40);
+doc.text("Timestamp: "+data.time,20,46);
 
-doc.text("OWNER",20,65);
-doc.text(data.name,20,71);
-doc.text(data.phone,20,77);
-doc.text(data.address,20,83);
-doc.text("BVN: "+data.bvn,20,89);
-doc.text("NIN: "+data.nin,20,95);
+doc.text("This document is a structured verification record",20,60);
+doc.text("generated under FSTL COMET OS.",20,66);
 
-doc.text("PROPERTY",20,110);
-doc.text(data.property,20,116);
-doc.text(data.location,20,122);
+let qrImg = qrDiv.querySelector("canvas").toDataURL("image/png");
+doc.addImage(qrImg,"PNG",140,40,50,50);
 
-doc.text("TRANSACTION",20,137);
-doc.text("Agent: "+data.agentName,20,143);
-doc.text("Total: ₦"+data.amount,20,149);
-doc.text("FSTL: ₦"+FEE,20,155);
-doc.text("Agent Earns: ₦"+data.agentProfit,20,161);
+footer();
 
-doc.addImage(qrImage,"PNG",140,40,50,50);
+// PAGE 2 — OWNER
+doc.addPage(); header();
+doc.text("OWNER IDENTITY",20,30);
+doc.text("Name: "+data.name,20,40);
+doc.text("Phone: "+data.phone,20,46);
+doc.text("Address: "+data.address,20,52);
+doc.text("BVN: "+data.bvn,20,58);
+doc.text("NIN: "+data.nin,20,64);
+footer();
 
-footer(doc);
+// PAGE 3 — PROPERTY
+doc.addPage(); header();
+doc.text("PROPERTY DETAILS",20,30);
+doc.text(data.property,20,40);
+doc.text(data.location,20,46);
+footer();
 
-// PAGE 2
-doc.addPage();
-header(doc);
+// PAGE 4 — TRANSACTION
+doc.addPage(); header();
+doc.text("TRANSACTION STRUCTURE",20,30);
+doc.text("Mode: "+data.mode,20,40);
+doc.text("FSTL Fee: ₦"+data.fstlFee,20,46);
+doc.text("Agent: "+data.agentName,20,52);
+doc.text("Agent Code: "+data.agentCode,20,58);
+doc.text("Agent Earnings: ₦"+data.agentProfit,20,64);
+doc.text("Total Paid: ₦"+data.total,20,70);
+footer();
 
+// PAGE 5 — HOW IT WORKS
+doc.addPage(); header();
+doc.text("SYSTEM PROCESS",20,30);
+doc.text("1. Data captured",20,40);
+doc.text("2. Record generated",20,46);
+doc.text("3. QR embedded",20,52);
+doc.text("4. Verification shared",20,58);
+footer();
+
+// PAGE 6 — SECURITY
+doc.addPage(); header();
+doc.text("SECURITY STRUCTURE",20,30);
+doc.text("• Unique ID",20,40);
+doc.text("• Timestamp",20,46);
+doc.text("• QR Verification",20,52);
+doc.text("• Registry linkage (pending activation)",20,58);
+footer();
+
+// PAGE 7 — LEGAL
+doc.addPage(); header();
 doc.text("LEGAL DECLARATION",20,30);
-doc.text("This document is issued by FIRST STANDARD TITLE LIMITED.",20,40);
-doc.text("It confirms submission and verification under FSTL COMET OS.",20,46);
+doc.text("This document is issued as a verification record",20,40);
+doc.text("under FSTL COMET OS.",20,46);
+doc.text("Scope limited to Title Verification and Title Insurance.",20,52);
+doc.text("Mortgage and lending are excluded.",20,58);
+footer();
 
-doc.text("Scope of FSTL:",20,60);
-doc.text("- Title Verification",20,66);
-doc.text("- Title Insurance",20,72);
+// PAGE 8 — USAGE
+doc.addPage(); header();
+doc.text("HOW TO USE",20,30);
+doc.text("Property Owners: Present as verified record.",20,40);
+doc.text("Financial Institutions: Scan QR to validate.",20,46);
+footer();
 
-doc.text("Mortgage, lending, or collateralization is excluded.",20,84);
-doc.text("This document is verifiable via QR scan.",20,96);
+// PAGE 9 — NEXT STEP (SOFT REVENUE SIGNAL)
+doc.addPage(); header();
+doc.text("NEXT STEP",20,30);
+doc.text("This is a demonstration sample.",20,40);
+doc.text("Live verification requires payment of ₦25,000.",20,46);
+doc.text("Activation will be enabled upon institutional integration.",20,60);
+footer();
 
-footer(doc);
-
-// PAGE 3
-doc.addPage();
-header(doc);
-
-doc.text("PAYMENT PROOF",20,30);
-doc.addImage(proof,"JPEG",20,40,160,100);
-
-footer(doc);
-
+// SAVE
 doc.save(data.id+".pdf");
-
-closeQR();
-alert("IRREFUTABLE DOCUMENT GENERATED");
-
-// WHATSAPP SHARE
-let msg=encodeURIComponent("FSTL VERIFIED PROPERTY\nID:"+data.id+"\nScan QR to verify");
-window.open("https://wa.me/?text="+msg);
 
 }
 
 // VERIFY PAGE
-function renderVerify(){
-let data=JSON.parse(decodeURIComponent(params.get("data")));
-document.getElementById("app").innerHTML=`
-<div style="background:#fff;padding:15px;border-radius:8px">
-<h3>VERIFICATION CONFIRMED</h3>
-<p><b>ID:</b> ${data.id}</p>
-<p><b>TIME:</b> ${data.time}</p>
-<p><b>AGENT CODE:</b> ${data.agentCode}</p>
-<p><b>NAME:</b> ${data.name}</p>
-<p><b>PHONE:</b> ${data.phone}</p>
-<p><b>BVN:</b> ${data.bvn}</p>
-<p><b>NIN:</b> ${data.nin}</p>
-<p><b>PROPERTY:</b> ${data.property}</p>
-<p><b>STATUS:</b> VERIFIED & TITLE INSURABLE</p>
-</div>
+const params = new URLSearchParams(window.location.search);
+if(params.has("data")){
+let d = JSON.parse(decodeURIComponent(params.get("data")));
+document.body.innerHTML = `
+<h2>VERIFIED RECORD</h2>
+<p>ID: ${d.id}</p>
+<p>NAME: ${d.name}</p>
+<p>STATUS: VERIFIED</p>
+<p>This record can be cross-checked via FSTL registry.</p>
 `;
-}
-
-// HELPERS
-function val(id){return document.getElementById(id).value;}
-function wait(ms){return new Promise(r=>setTimeout(r,ms));}
-function toBase64(file){
-return new Promise((res,rej)=>{
-let r=new FileReader();
-r.readAsDataURL(file);
-r.onload=()=>res(r.result);
-r.onerror=e=>rej(e);
-});
-}
-
-// QR POPUP
-function showQR(url){
-let modal=document.getElementById("qrModal");
-modal.style.display="flex";
-let box=document.getElementById("qrCanvas");
-box.innerHTML="";
-new QRCode(box,{text:url,width:180,height:180});
-}
-function closeQR(){document.getElementById("qrModal").style.display="none";}
-
-// PDF HEADER / FOOTER
-function header(doc){
-doc.setFontSize(10);
-doc.text("FIRST STANDARD TITLE LIMITED",20,10);
-doc.text("Email: fstlofficialsite@gmail.com | +2348035888622",20,15);
-doc.line(20,18,190,18);
-}
-function footer(doc){
-doc.line(20,280,190,280);
-doc.setFontSize(8);
-doc.text("FSTL COMET OS | Title Verified | Title Insurance Eligible",20,285);
-doc.text("Account: 2025222557",20,290);
 }
 
 </script>
