@@ -3,25 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS V49 – COURT DEMO</title>
+<title>FSTL COMET OS – DEMO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#0a0a0a;color:#fff;text-align:center;padding:20px;}
-.container{max-width:800px;margin:auto;background:#fff;color:#000;padding:20px;border-radius:8px;}
-input,select{width:100%;padding:10px;margin:5px 0;}
-button{padding:12px 20px;background:#003366;color:#fff;border:none;margin-top:10px;}
+body {font-family: Arial; background:#eef2f5; padding:20px;}
+.container {max-width:800px;margin:auto;background:#fff;padding:20px;border-radius:8px;}
+input, select {width:100%; padding:10px; margin:5px 0;}
+button {width:100%; padding:15px; background:#003366; color:#fff; border:none;}
+canvas {margin-top:10px;}
 </style>
 </head>
 
 <body>
 
-<h2>FSTL COMET OS – DEMONSTRATION MODE</h2>
-<p>Land & Property Verification + Title Insurance Engine</p>
-
 <div class="container">
+<h2>FSTL COMET OS – DEMONSTRATION</h2>
 
 <select id="scenario" onchange="prefill()">
 <option value="">Select Scenario</option>
@@ -35,24 +34,26 @@ button{padding:12px 20px;background:#003366;color:#fff;border:none;margin-top:10
 <input id="address" placeholder="Property Address">
 <input id="bvn" placeholder="BVN">
 <input id="nin" placeholder="NIN">
-<input id="agent" placeholder="Agent Name / Code">
+<input id="agent" placeholder="Agent Code">
 
-<button onclick="generatePDF()">Generate Verification PDF</button>
+<button onclick="generatePDF()">GENERATE PDF</button>
+
+<h3>QR Preview</h3>
+<canvas id="qr"></canvas>
 
 </div>
 
-<canvas id="qr" style="display:none;"></canvas>
-
 <script>
+const { jsPDF } = window.jspdf;
 
 const scenarios = {
-1:{name:"John Doe",phone:"08012345678",address:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"Agent A"},
-2:{name:"Jane Smith",phone:"08023456789",address:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"Agent B"},
-3:{name:"Michael King",phone:"08034567890",address:"Victoria Island Lagos",bvn:"34567890123",nin:"76543210987",agent:"Agent C"}
+1:{name:"John Doe",phone:"08012345678",address:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"AGT-001"},
+2:{name:"Jane Smith",phone:"08023456789",address:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"AGT-002"},
+3:{name:"Michael King",phone:"08034567890",address:"Victoria Island Lagos",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
 };
 
 function prefill(){
-let s=scenarios[document.getElementById("scenario").value];
+let s = scenarios[scenario.value];
 if(!s) return;
 name.value=s.name;
 phone.value=s.phone;
@@ -62,88 +63,115 @@ nin.value=s.nin;
 agent.value=s.agent;
 }
 
+function header(doc){
+doc.setFontSize(10);
+doc.text("FIRST STANDARD TITLE LIMITED (FSTL)",20,10);
+doc.text("Verification & Title Insurance System",20,15);
+doc.line(20,18,190,18);
+}
+
+function footer(doc){
+doc.line(20,280,190,280);
+doc.setFontSize(8);
+doc.text("FSTL COMET OS DEMO",20,285);
+doc.text("Contact: +234 803 588 8622",20,290);
+}
+
 function generatePDF(){
 
-const { jsPDF } = window.jspdf;
+let id = "FSTL-" + Date.now();
+let time = new Date().toLocaleString();
 
-let id="FSTL-"+Date.now();
-let time=new Date().toLocaleString();
-
-let qrCanvas=document.getElementById("qr");
-new QRious({
-element:qrCanvas,
-value:"https://fstl-demo/verify?id="+id,
+// QR GENERATION
+let qr = new QRious({
+element: document.getElementById("qr"),
+value: "https://fstl-demo/verify?id=" + id,
 size:150
 });
 
-let qrImg=qrCanvas.toDataURL("image/png");
+// Convert QR to image
+let qrImage = document.getElementById("qr").toDataURL("image/png");
 
-let doc=new jsPDF();
+let doc = new jsPDF();
 
-// 🔴 PAGE 1 – CORE
+// PAGE 1
+header(doc);
 doc.setFontSize(14);
-doc.text("FSTL COMET OS – DEMO",20,20);
+doc.text("PROPERTY VERIFICATION REPORT",20,30);
+
 doc.setFontSize(10);
-doc.text("Verification ID: "+id,20,30);
-doc.text("Timestamp: "+time,20,36);
+doc.text("Verification ID: " + id,20,40);
+doc.text("Timestamp: " + time,20,46);
 
-doc.text("OWNER:",20,50);
-doc.text(name.value,20,56);
-doc.text("BVN: "+bvn.value,20,62);
-doc.text("NIN: "+nin.value,20,68);
+doc.text("OWNER DETAILS",20,60);
+doc.text("Name: " + name.value,20,70);
+doc.text("Phone: " + phone.value,20,76);
+doc.text("BVN: " + bvn.value,20,82);
+doc.text("NIN: " + nin.value,20,88);
 
-doc.text("PROPERTY:",20,80);
-doc.text(address.value,20,86);
+doc.text("PROPERTY DETAILS",20,105);
+doc.text(address.value,20,115);
 
-doc.addImage(qrImg,"PNG",140,30,50,50);
+doc.addImage(qrImage,"PNG",140,40,50,50);
 
-// 🔴 PAGE 2 – SECURITY
-doc.addPage();
-doc.text("SECURITY STRUCTURE",20,20);
-doc.text("• Unique ID",20,30);
-doc.text("• Timestamp",20,36);
-doc.text("• QR Verification",20,42);
-doc.text("• Identity Anchors (BVN + NIN)",20,48);
+footer(doc);
 
-doc.text("THIS DOCUMENT REPRESENTS A VERIFICATION RECORD.",20,60);
+// PAGE 2
+doc.addPage(); header(doc);
+doc.text("TRANSACTION CONTEXT",20,30);
+doc.text("Agent Code: " + agent.value,20,40);
+doc.text("Mode: Direct / Agent",20,50);
+footer(doc);
 
-// 🔴 PAGE 3 – TITLE INSURANCE
-doc.addPage();
-doc.text("TITLE INSURANCE",20,20);
-doc.text("Protects ownership from fraud.",20,30);
-doc.text("Enhances trust for institutions.",20,36);
-doc.text("Supports collateralisation.",20,42);
+// PAGE 3
+doc.addPage(); header(doc);
+doc.text("VERIFICATION STRUCTURE",20,30);
+doc.text("• Unique ID",20,45);
+doc.text("• Timestamp",20,55);
+doc.text("• BVN + NIN linkage",20,65);
+doc.text("• QR verification",20,75);
+footer(doc);
 
-doc.text("FSTL ENDS AT:",20,60);
-doc.text("• Verification",20,66);
-doc.text("• Title Insurance",20,72);
+// PAGE 4
+doc.addPage(); header(doc);
+doc.text("TITLE INSURANCE",20,30);
+doc.text("Protects ownership against fraud",20,45);
+doc.text("Enhances institutional trust",20,55);
+doc.text("Supports collateral usage",20,65);
+footer(doc);
 
-// 🔴 PAGE 4 – APPLICATION
-doc.addPage();
-doc.text("WHAT YOU CAN DO",20,20);
-doc.text("• Present as ownership evidence",20,30);
-doc.text("• Approach financial institutions",20,36);
-doc.text("• Establish property value",20,42);
+// PAGE 5
+doc.addPage(); header(doc);
+doc.text("APPLICATION",20,30);
+doc.text("• Ownership proof",20,45);
+doc.text("• Bank presentation",20,55);
+doc.text("• Asset valuation support",20,65);
+footer(doc);
 
-// 🔴 PAGE 5 – Q&A
-doc.addPage();
-doc.text("Q&A",20,20);
-doc.text("Q: Is this verifiable?",20,30);
-doc.text("A: Yes via QR.",20,36);
-doc.text("Q: Can it be altered?",20,50);
-doc.text("A: Changes break verification.",20,56);
+// PAGE 6
+doc.addPage(); header(doc);
+doc.text("FSTL SCOPE",20,30);
+doc.text("Provides Verification & Title Insurance",20,45);
+doc.text("Does NOT provide loans",20,55);
+footer(doc);
 
-// 🔴 PAGE 6 – DEMO NOTICE
-doc.addPage();
-doc.text("DEMONSTRATION NOTICE",20,20);
-doc.text("This is NOT a live verification.",20,30);
-doc.text("Live service requires ₦25,000.",20,36);
+// PAGE 7
+doc.addPage(); header(doc);
+doc.text("Q&A",20,30);
+doc.text("Verifiable? YES via QR",20,45);
+doc.text("Final? NO – DEMO",20,55);
+footer(doc);
 
-doc.save(id+".pdf");
+// PAGE 8
+doc.addPage(); header(doc);
+doc.text("DEMO NOTICE",20,30);
+doc.text("Full verification requires ₦25,000",20,45);
+footer(doc);
+
+doc.save(id + ".pdf");
 
 }
-
 </script>
 
 </body>
-</html>
+</html> f
