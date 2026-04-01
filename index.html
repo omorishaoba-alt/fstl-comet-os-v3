@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS – WHOA DEMO</title>
+<title>FSTL COMET OS – V53 FINAL</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -14,15 +14,13 @@ body {font-family: Arial; background:#eef2f5; padding:20px;}
 input, select {width:100%; padding:10px; margin:6px 0;}
 button {width:100%; padding:15px; background:#003366; color:#fff; border:none;}
 canvas {margin-top:10px;}
-h2 {margin-top:0;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h2>FSTL COMET OS – DEMONSTRATION</h2>
-<p>Verified Property Record Generator (Demo Mode)</p>
+<h2>FSTL COMET OS – VERIFIED PROPERTY DEMO</h2>
 
 <select id="scenario" onchange="prefill()">
 <option value="">Select Scenario</option>
@@ -32,8 +30,8 @@ h2 {margin-top:0;}
 </select>
 
 <input id="name" placeholder="Full Name">
-<input id="phone" placeholder="Phone Number">
-<input id="email" placeholder="Email Address">
+<input id="phone" placeholder="Phone">
+<input id="email" placeholder="Email">
 <input id="ownerAddress" placeholder="Owner Address">
 <input id="propertyAddress" placeholder="Property Address">
 <input id="bvn" placeholder="BVN">
@@ -52,7 +50,7 @@ const { jsPDF } = window.jspdf;
 const scenarios = {
 1:{name:"John Doe",phone:"08012345678",email:"john@email.com",ownerAddress:"Abuja Nigeria",propertyAddress:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"AGT-001"},
 2:{name:"Jane Smith",phone:"08023456789",email:"jane@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"AGT-002"},
-3:{name:"Michael King",phone:"08034567890",email:"mike@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Victoria Island",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
+3:{name:"Michael King",phone:"08034567890",email:"mike@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Victoria Island Lagos",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
 };
 
 function prefill(){
@@ -71,7 +69,7 @@ agent.value=s.agent;
 function header(doc){
 doc.setFontSize(10);
 doc.text("FIRST STANDARD TITLE LIMITED (FSTL)",20,10);
-doc.text("FSTL COMET OS – Intelligence Verification Engine",20,15);
+doc.text("FSTL COMET OS – Verification & Title Insurance Engine",20,15);
 doc.line(20,18,190,18);
 }
 
@@ -102,7 +100,7 @@ let id = "FSTL-" + Date.now();
 let time = new Date().toLocaleString();
 
 // QR
-let qr = new QRious({
+new QRious({
 element: document.getElementById("qr"),
 value: "https://fstl-demo/verify?id=" + id,
 size:150
@@ -112,7 +110,7 @@ let qrImg = document.getElementById("qr").toDataURL("image/png");
 
 let doc = new jsPDF();
 
-// PAGE 1 – WHOA
+// PAGE 1 – IMPACT
 header(doc);
 doc.setFontSize(16);
 doc.text("VERIFIED PROPERTY RECORD",20,40);
@@ -150,72 +148,95 @@ propertyAddress.value
 
 // PAGE 4 – VERIFICATION
 addPage(doc,"VERIFICATION STRUCTURE",[
-"Identity linkage (BVN + NIN)",
-"Timestamped record",
-"Unique verification ID",
-"AI-assisted validation",
-"Powered by FSTL COMET OS"
+"This property record has been structured using FSTL COMET OS logic.",
+"",
+"It links identity (BVN + NIN) with property data to create a traceable record.",
+"",
+"A unique ID and timestamp ensure every record is distinct.",
+"",
+"AI-assisted validation improves consistency and reduces risk.",
+"",
+"This forms the foundation for institutional trust."
 ]);
 
 // PAGE 5 – TITLE INSURANCE
 addPage(doc,"TITLE INSURANCE",[
-"Protects ownership from fraud",
-"Reduces dispute risk",
-"Enhances institutional trust",
-"Supports collateralisation"
+"Title insurance protects ownership against:",
+"",
+"- Fraudulent sale",
+"- Hidden claims",
+"- Documentation issues",
+"",
+"It enhances credibility and enables institutional acceptance.",
+"",
+"It transforms land into a structured and insurable asset."
 ]);
 
 // PAGE 6 – WHY IT MATTERS
-addPage(doc,"WHY THIS MATTERS",[
-"Prevents double sale",
-"Creates certainty",
-"Standardises land records",
-"Enables asset liquidity"
+addPage(doc,"WHY THIS DOCUMENT MATTERS",[
+"Land ownership often lacks clarity and consistency.",
+"",
+"FSTL introduces a structured system that:",
+"",
+"- Reduces fraud risk",
+"- Creates ownership certainty",
+"- Standardises records",
+"",
+"This enables land to become a trusted financial asset."
 ]);
 
 // PAGE 7 – OWNER USE
 addPage(doc,"WHAT YOU CAN DO",[
-"Prove ownership",
-"Approach financial institutions",
+"Demonstrate ownership clearly",
+"Present to financial institutions",
 "Transfer property confidently",
-"Support inheritance"
+"Support inheritance planning"
 ]);
 
 // PAGE 8 – AGENT
 addPage(doc,"AGENT APPLICATION",[
-"Act for clients",
-"Generate reports",
+"Act on behalf of clients",
+"Generate structured reports",
 "Facilitate transactions"
 ]);
 
 // PAGE 9 – INSTITUTION
-addPage(doc,"INSTITUTION APPLICATION",[
-"Assess ownership",
-"Reduce fraud",
-"Support lending decisions"
+addPage(doc,"FOR FINANCIAL INSTITUTIONS",[
+"Provides structured verification layer",
+"",
+"Helps institutions:",
+"- Assess ownership credibility",
+"- Reduce fraud exposure",
+"- Support lending decisions",
+"",
+"FSTL does not provide loans."
 ]);
 
 // PAGE 10 – SECURITY
 addPage(doc,"SECURITY FEATURES",[
 "Verification ID",
-"QR code linkage",
+"QR Code linkage",
 "Timestamp",
-"Identity anchors",
-"Any alteration invalidates record"
+"Identity anchors (BVN + NIN)",
+"",
+"Any alteration invalidates the record integrity."
 ]);
 
 // PAGE 11 – Q&A
-addPage(doc,"Q&A",[
-"Is it verifiable? Yes via QR",
-"Is it final? Demo version",
-"Can banks use it? Yes in live mode"
+addPage(doc,"FREQUENTLY ASKED QUESTIONS",[
+"Is this verifiable? Yes via QR.",
+"Is this final? No – demonstration.",
+"Can banks use it? Yes in live mode.",
+"How is fraud reduced? Through structured verification."
 ]);
 
 // PAGE 12 – DEMO NOTICE
 addPage(doc,"DEMONSTRATION NOTICE",[
-"This is a demo document",
-"Full verification costs ₦25,000",
-"Live system integrates with institutions"
+"This is a DEMO document.",
+"",
+"Full verification requires ₦25,000.",
+"",
+"Live system integrates with institutions."
 ]);
 
 doc.save(id + ".pdf");
