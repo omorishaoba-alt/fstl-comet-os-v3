@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS – V53 FINAL</title>
+<title>FSTL COMET OS – V54</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -33,7 +33,12 @@ canvas {margin-top:10px;}
 <input id="phone" placeholder="Phone">
 <input id="email" placeholder="Email">
 <input id="ownerAddress" placeholder="Owner Address">
+
 <input id="propertyAddress" placeholder="Property Address">
+<input id="description" placeholder="Property Description (e.g. 3-Bedroom Duplex)">
+<input id="size" placeholder="Property Size (e.g. 500 sqm)">
+<input id="location" placeholder="Property Location (City / State)">
+
 <input id="bvn" placeholder="BVN">
 <input id="nin" placeholder="NIN">
 <input id="agent" placeholder="Agent Code">
@@ -48,22 +53,39 @@ canvas {margin-top:10px;}
 const { jsPDF } = window.jspdf;
 
 const scenarios = {
-1:{name:"John Doe",phone:"08012345678",email:"john@email.com",ownerAddress:"Abuja Nigeria",propertyAddress:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"AGT-001"},
-2:{name:"Jane Smith",phone:"08023456789",email:"jane@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"AGT-002"},
-3:{name:"Michael King",phone:"08034567890",email:"mike@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Victoria Island Lagos",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
+1:{
+name:"John Doe",phone:"08012345678",email:"john@email.com",
+ownerAddress:"Abuja Nigeria",
+propertyAddress:"GRA Benin City",
+description:"Residential Land",
+size:"500 sqm",
+location:"Benin City, Edo State",
+bvn:"12345678901",nin:"98765432101",agent:"AGT-001"
+},
+2:{
+name:"Jane Smith",phone:"08023456789",email:"jane@email.com",
+ownerAddress:"Lagos Nigeria",
+propertyAddress:"Ikeja Lagos",
+description:"Office Complex",
+size:"1200 sqm",
+location:"Ikeja, Lagos State",
+bvn:"23456789012",nin:"87654321098",agent:"AGT-002"
+},
+3:{
+name:"Michael King",phone:"08034567890",email:"mike@email.com",
+ownerAddress:"Lagos Nigeria",
+propertyAddress:"Victoria Island",
+description:"Mixed Use Building",
+size:"800 sqm",
+location:"Victoria Island, Lagos",
+bvn:"34567890123",nin:"76543210987",agent:"AGT-003"
+}
 };
 
 function prefill(){
 let s = scenarios[scenario.value];
 if(!s) return;
-name.value=s.name;
-phone.value=s.phone;
-email.value=s.email;
-ownerAddress.value=s.ownerAddress;
-propertyAddress.value=s.propertyAddress;
-bvn.value=s.bvn;
-nin.value=s.nin;
-agent.value=s.agent;
+for(let key in s){ document.getElementById(key).value = s[key]; }
 }
 
 function header(doc){
@@ -76,7 +98,7 @@ doc.line(20,18,190,18);
 function footer(doc){
 doc.line(20,280,190,280);
 doc.setFontSize(8);
-doc.text("FSTL COMET OS DEMO DOCUMENT",20,285);
+doc.text("FSTL COMET OS DEMO",20,285);
 doc.text("Contact: +234 803 588 8622 | info@fstl.com.ng",20,290);
 }
 
@@ -105,7 +127,6 @@ element: document.getElementById("qr"),
 value: "https://fstl-demo/verify?id=" + id,
 size:150
 });
-
 let qrImg = document.getElementById("qr").toDataURL("image/png");
 
 let doc = new jsPDF();
@@ -141,98 +162,57 @@ addPage(doc,"OWNER IDENTITY",[
 "NIN: "+nin.value
 ]);
 
-// PAGE 3 – PROPERTY
+// PAGE 3 – PROPERTY (FIXED 🔥)
 addPage(doc,"PROPERTY DETAILS",[
-propertyAddress.value
+"Address: "+propertyAddress.value,
+"Description: "+description.value,
+"Size: "+size.value,
+"Location: "+location.value
 ]);
 
-// PAGE 4 – VERIFICATION
-addPage(doc,"VERIFICATION STRUCTURE",[
-"This property record has been structured using FSTL COMET OS logic.",
+// PAGE 4 – VERIFICATION + SECURITY
+addPage(doc,"VERIFICATION & SECURITY STRUCTURE",[
+"This record links identity (BVN + NIN) with property data.",
 "",
-"It links identity (BVN + NIN) with property data to create a traceable record.",
+"A unique ID and timestamp ensure traceability.",
 "",
-"A unique ID and timestamp ensure every record is distinct.",
+"QR code enables quick verification reference.",
 "",
-"AI-assisted validation improves consistency and reduces risk.",
+"AI-assisted validation improves consistency.",
 "",
-"This forms the foundation for institutional trust."
+"Any alteration may invalidate record integrity."
 ]);
 
-// PAGE 5 – TITLE INSURANCE
-addPage(doc,"TITLE INSURANCE",[
-"Title insurance protects ownership against:",
+// PAGE 5 – TITLE INSURANCE + VALUE
+addPage(doc,"TITLE INSURANCE & VALUE",[
+"Title insurance protects against fraud and disputes.",
 "",
-"- Fraudulent sale",
-"- Hidden claims",
-"- Documentation issues",
+"It enhances trust and supports institutional acceptance.",
 "",
-"It enhances credibility and enables institutional acceptance.",
+"This transforms property into a structured, usable asset.",
 "",
-"It transforms land into a structured and insurable asset."
+"It enables safer transactions and financial consideration."
 ]);
 
-// PAGE 6 – WHY IT MATTERS
-addPage(doc,"WHY THIS DOCUMENT MATTERS",[
-"Land ownership often lacks clarity and consistency.",
+// PAGE 6 – USE CASES
+addPage(doc,"APPLICATION",[
+"OWNER:",
+"- Prove ownership",
+"- Approach financial institutions",
 "",
-"FSTL introduces a structured system that:",
+"AGENT:",
+"- Facilitate transactions",
+"- Generate reports",
 "",
-"- Reduces fraud risk",
-"- Creates ownership certainty",
-"- Standardises records",
-"",
-"This enables land to become a trusted financial asset."
-]);
-
-// PAGE 7 – OWNER USE
-addPage(doc,"WHAT YOU CAN DO",[
-"Demonstrate ownership clearly",
-"Present to financial institutions",
-"Transfer property confidently",
-"Support inheritance planning"
-]);
-
-// PAGE 8 – AGENT
-addPage(doc,"AGENT APPLICATION",[
-"Act on behalf of clients",
-"Generate structured reports",
-"Facilitate transactions"
-]);
-
-// PAGE 9 – INSTITUTION
-addPage(doc,"FOR FINANCIAL INSTITUTIONS",[
-"Provides structured verification layer",
-"",
-"Helps institutions:",
+"INSTITUTION:",
 "- Assess ownership credibility",
-"- Reduce fraud exposure",
-"- Support lending decisions",
-"",
-"FSTL does not provide loans."
+"- Reduce fraud exposure"
 ]);
 
-// PAGE 10 – SECURITY
-addPage(doc,"SECURITY FEATURES",[
-"Verification ID",
-"QR Code linkage",
-"Timestamp",
-"Identity anchors (BVN + NIN)",
-"",
-"Any alteration invalidates the record integrity."
-]);
-
-// PAGE 11 – Q&A
-addPage(doc,"FREQUENTLY ASKED QUESTIONS",[
-"Is this verifiable? Yes via QR.",
-"Is this final? No – demonstration.",
-"Can banks use it? Yes in live mode.",
-"How is fraud reduced? Through structured verification."
-]);
-
-// PAGE 12 – DEMO NOTICE
-addPage(doc,"DEMONSTRATION NOTICE",[
-"This is a DEMO document.",
+// PAGE 7 – Q&A + DEMO
+addPage(doc,"Q&A + DEMONSTRATION NOTICE",[
+"Verifiable? Yes via QR.",
+"Final? No – Demo version.",
 "",
 "Full verification requires ₦25,000.",
 "",
