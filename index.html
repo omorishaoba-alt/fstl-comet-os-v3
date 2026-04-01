@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FSTL COMET OS – DEMO</title>
+<title>FSTL COMET OS – WHOA DEMO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
 <style>
 body {font-family: Arial; background:#eef2f5; padding:20px;}
-.container {max-width:800px;margin:auto;background:#fff;padding:20px;border-radius:8px;}
-input, select {width:100%; padding:10px; margin:5px 0;}
+.container {max-width:850px;margin:auto;background:#fff;padding:20px;border-radius:8px;}
+input, select {width:100%; padding:10px; margin:6px 0;}
 button {width:100%; padding:15px; background:#003366; color:#fff; border:none;}
 canvas {margin-top:10px;}
+h2 {margin-top:0;}
 </style>
 </head>
 
@@ -21,6 +22,7 @@ canvas {margin-top:10px;}
 
 <div class="container">
 <h2>FSTL COMET OS – DEMONSTRATION</h2>
+<p>Verified Property Record Generator (Demo Mode)</p>
 
 <select id="scenario" onchange="prefill()">
 <option value="">Select Scenario</option>
@@ -30,26 +32,27 @@ canvas {margin-top:10px;}
 </select>
 
 <input id="name" placeholder="Full Name">
-<input id="phone" placeholder="Phone">
-<input id="address" placeholder="Property Address">
+<input id="phone" placeholder="Phone Number">
+<input id="email" placeholder="Email Address">
+<input id="ownerAddress" placeholder="Owner Address">
+<input id="propertyAddress" placeholder="Property Address">
 <input id="bvn" placeholder="BVN">
 <input id="nin" placeholder="NIN">
 <input id="agent" placeholder="Agent Code">
 
-<button onclick="generatePDF()">GENERATE PDF</button>
+<button onclick="generatePDF()">GENERATE VERIFIED PROPERTY PDF</button>
 
-<h3>QR Preview</h3>
+<h3>Scan to Verify</h3>
 <canvas id="qr"></canvas>
-
 </div>
 
 <script>
 const { jsPDF } = window.jspdf;
 
 const scenarios = {
-1:{name:"John Doe",phone:"08012345678",address:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"AGT-001"},
-2:{name:"Jane Smith",phone:"08023456789",address:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"AGT-002"},
-3:{name:"Michael King",phone:"08034567890",address:"Victoria Island Lagos",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
+1:{name:"John Doe",phone:"08012345678",email:"john@email.com",ownerAddress:"Abuja Nigeria",propertyAddress:"GRA Benin City",bvn:"12345678901",nin:"98765432101",agent:"AGT-001"},
+2:{name:"Jane Smith",phone:"08023456789",email:"jane@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Ikeja Lagos",bvn:"23456789012",nin:"87654321098",agent:"AGT-002"},
+3:{name:"Michael King",phone:"08034567890",email:"mike@email.com",ownerAddress:"Lagos Nigeria",propertyAddress:"Victoria Island",bvn:"34567890123",nin:"76543210987",agent:"AGT-003"}
 };
 
 function prefill(){
@@ -57,7 +60,9 @@ let s = scenarios[scenario.value];
 if(!s) return;
 name.value=s.name;
 phone.value=s.phone;
-address.value=s.address;
+email.value=s.email;
+ownerAddress.value=s.ownerAddress;
+propertyAddress.value=s.propertyAddress;
 bvn.value=s.bvn;
 nin.value=s.nin;
 agent.value=s.agent;
@@ -66,15 +71,29 @@ agent.value=s.agent;
 function header(doc){
 doc.setFontSize(10);
 doc.text("FIRST STANDARD TITLE LIMITED (FSTL)",20,10);
-doc.text("Verification & Title Insurance System",20,15);
+doc.text("FSTL COMET OS – Intelligence Verification Engine",20,15);
 doc.line(20,18,190,18);
 }
 
 function footer(doc){
 doc.line(20,280,190,280);
 doc.setFontSize(8);
-doc.text("FSTL COMET OS DEMO",20,285);
-doc.text("Contact: +234 803 588 8622",20,290);
+doc.text("FSTL COMET OS DEMO DOCUMENT",20,285);
+doc.text("Contact: +234 803 588 8622 | info@fstl.com.ng",20,290);
+}
+
+function addPage(doc,title,lines){
+doc.addPage(); header(doc);
+doc.setFontSize(14);
+doc.text(title,20,30);
+doc.setFontSize(10);
+
+let y=45;
+lines.forEach(line=>{
+doc.text(line,20,y);
+y+=8;
+});
+footer(doc);
 }
 
 function generatePDF(){
@@ -82,91 +101,122 @@ function generatePDF(){
 let id = "FSTL-" + Date.now();
 let time = new Date().toLocaleString();
 
-// QR GENERATION
+// QR
 let qr = new QRious({
 element: document.getElementById("qr"),
 value: "https://fstl-demo/verify?id=" + id,
 size:150
 });
 
-// Convert QR to image
-let qrImage = document.getElementById("qr").toDataURL("image/png");
+let qrImg = document.getElementById("qr").toDataURL("image/png");
 
 let doc = new jsPDF();
 
-// PAGE 1
+// PAGE 1 – WHOA
 header(doc);
-doc.setFontSize(14);
-doc.text("PROPERTY VERIFICATION REPORT",20,30);
+doc.setFontSize(16);
+doc.text("VERIFIED PROPERTY RECORD",20,40);
+doc.setFontSize(11);
+doc.text("FSTL COMET OS INTELLIGENCE ENGINE",20,50);
 
-doc.setFontSize(10);
-doc.text("Verification ID: " + id,20,40);
-doc.text("Timestamp: " + time,20,46);
+doc.text("Verification ID: " + id,20,65);
+doc.text("Timestamp: " + time,20,72);
 
-doc.text("OWNER DETAILS",20,60);
-doc.text("Name: " + name.value,20,70);
-doc.text("Phone: " + phone.value,20,76);
-doc.text("BVN: " + bvn.value,20,82);
-doc.text("NIN: " + nin.value,20,88);
+doc.text("STATUS: VERIFIED",20,90);
+doc.text("CONFIDENCE LEVEL: HIGH",20,98);
 
-doc.text("PROPERTY DETAILS",20,105);
-doc.text(address.value,20,115);
+doc.text("Owner: " + name.value,20,115);
+doc.text("Property: " + propertyAddress.value,20,123);
 
-doc.addImage(qrImage,"PNG",140,40,50,50);
+doc.text("Scan QR to verify",140,100);
+doc.addImage(qrImg,"PNG",140,110,50,50);
 
 footer(doc);
 
-// PAGE 2
-doc.addPage(); header(doc);
-doc.text("TRANSACTION CONTEXT",20,30);
-doc.text("Agent Code: " + agent.value,20,40);
-doc.text("Mode: Direct / Agent",20,50);
-footer(doc);
+// PAGE 2 – OWNER
+addPage(doc,"OWNER IDENTITY",[
+"Name: "+name.value,
+"Phone: "+phone.value,
+"Email: "+email.value,
+"Address: "+ownerAddress.value,
+"BVN: "+bvn.value,
+"NIN: "+nin.value
+]);
 
-// PAGE 3
-doc.addPage(); header(doc);
-doc.text("VERIFICATION STRUCTURE",20,30);
-doc.text("• Unique ID",20,45);
-doc.text("• Timestamp",20,55);
-doc.text("• BVN + NIN linkage",20,65);
-doc.text("• QR verification",20,75);
-footer(doc);
+// PAGE 3 – PROPERTY
+addPage(doc,"PROPERTY DETAILS",[
+propertyAddress.value
+]);
 
-// PAGE 4
-doc.addPage(); header(doc);
-doc.text("TITLE INSURANCE",20,30);
-doc.text("Protects ownership against fraud",20,45);
-doc.text("Enhances institutional trust",20,55);
-doc.text("Supports collateral usage",20,65);
-footer(doc);
+// PAGE 4 – VERIFICATION
+addPage(doc,"VERIFICATION STRUCTURE",[
+"Identity linkage (BVN + NIN)",
+"Timestamped record",
+"Unique verification ID",
+"AI-assisted validation",
+"Powered by FSTL COMET OS"
+]);
 
-// PAGE 5
-doc.addPage(); header(doc);
-doc.text("APPLICATION",20,30);
-doc.text("• Ownership proof",20,45);
-doc.text("• Bank presentation",20,55);
-doc.text("• Asset valuation support",20,65);
-footer(doc);
+// PAGE 5 – TITLE INSURANCE
+addPage(doc,"TITLE INSURANCE",[
+"Protects ownership from fraud",
+"Reduces dispute risk",
+"Enhances institutional trust",
+"Supports collateralisation"
+]);
 
-// PAGE 6
-doc.addPage(); header(doc);
-doc.text("FSTL SCOPE",20,30);
-doc.text("Provides Verification & Title Insurance",20,45);
-doc.text("Does NOT provide loans",20,55);
-footer(doc);
+// PAGE 6 – WHY IT MATTERS
+addPage(doc,"WHY THIS MATTERS",[
+"Prevents double sale",
+"Creates certainty",
+"Standardises land records",
+"Enables asset liquidity"
+]);
 
-// PAGE 7
-doc.addPage(); header(doc);
-doc.text("Q&A",20,30);
-doc.text("Verifiable? YES via QR",20,45);
-doc.text("Final? NO – DEMO",20,55);
-footer(doc);
+// PAGE 7 – OWNER USE
+addPage(doc,"WHAT YOU CAN DO",[
+"Prove ownership",
+"Approach financial institutions",
+"Transfer property confidently",
+"Support inheritance"
+]);
 
-// PAGE 8
-doc.addPage(); header(doc);
-doc.text("DEMO NOTICE",20,30);
-doc.text("Full verification requires ₦25,000",20,45);
-footer(doc);
+// PAGE 8 – AGENT
+addPage(doc,"AGENT APPLICATION",[
+"Act for clients",
+"Generate reports",
+"Facilitate transactions"
+]);
+
+// PAGE 9 – INSTITUTION
+addPage(doc,"INSTITUTION APPLICATION",[
+"Assess ownership",
+"Reduce fraud",
+"Support lending decisions"
+]);
+
+// PAGE 10 – SECURITY
+addPage(doc,"SECURITY FEATURES",[
+"Verification ID",
+"QR code linkage",
+"Timestamp",
+"Identity anchors",
+"Any alteration invalidates record"
+]);
+
+// PAGE 11 – Q&A
+addPage(doc,"Q&A",[
+"Is it verifiable? Yes via QR",
+"Is it final? Demo version",
+"Can banks use it? Yes in live mode"
+]);
+
+// PAGE 12 – DEMO NOTICE
+addPage(doc,"DEMONSTRATION NOTICE",[
+"This is a demo document",
+"Full verification costs ₦25,000",
+"Live system integrates with institutions"
+]);
 
 doc.save(id + ".pdf");
 
@@ -174,4 +224,4 @@ doc.save(id + ".pdf");
 </script>
 
 </body>
-</html> 
+</html>
